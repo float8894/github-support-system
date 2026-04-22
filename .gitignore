@@ -1,0 +1,48 @@
+# Dependencies
+node_modules/
+.npm
+.pnpm-store/
+
+# Build outputs
+dist/
+build/
+*.tsbuildinfo
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Testing
+coverage/
+.nyc_output/
+
+# Angular specific
+.angular/
+packages/frontend/.angular/
+
+# Docker
+.docker/
+*.pid
+
+# Temporary files
+tmp/
+temp/
+*.tmp

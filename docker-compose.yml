@@ -1,0 +1,44 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg17
+    container_name: github-support-postgres
+    environment:
+      POSTGRES_USER: github_support
+      POSTGRES_PASSWORD: dev_password_change_in_prod
+      POSTGRES_DB: github_support
+    ports:
+      - '5434:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./packages/backend/src/db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U github_support']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - support-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: github-support-redis
+    ports:
+      - '6380:6379'
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - support-network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  support-network:
+    driver: bridge

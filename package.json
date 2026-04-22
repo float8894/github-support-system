@@ -1,0 +1,35 @@
+{
+  "name": "github-support-system",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Multi-agent GitHub support resolution system with RAG and MCP",
+  "workspaces": [
+    "packages/backend",
+    "packages/mcp-server",
+    "packages/frontend"
+  ],
+  "scripts": {
+    "dev:backend": "npm run dev --workspace=packages/backend",
+    "dev:mcp": "npm run dev --workspace=packages/mcp-server",
+    "dev:frontend": "npm run dev --workspace=packages/frontend",
+    "build": "npm run build --workspaces",
+    "test": "npm run test --workspaces",
+    "typecheck": "npm run typecheck --workspaces",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "db:migrate": "npm run db:migrate --workspace=packages/backend",
+    "db:seed": "npm run db:seed --workspace=packages/backend",
+    "ingest": "npm run ingest --workspace=packages/backend"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^5.7.0",
+    "tsx": "^4.19.2",
+    "vitest": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=24.0.0",
+    "npm": ">=10.0.0"
+  }
+}
