@@ -24,6 +24,9 @@ const envSchema = z.object({
 
   // Logging
   LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).default('debug'),
+
+  // Admin API key for protected routes (e.g. POST /api/ingest)
+  ADMIN_API_KEY: z.string().default('dev-admin-key'),
 });
 
 export type Env = z.infer<typeof envSchema>;

@@ -288,9 +288,12 @@ async function ingestUrl(url: string): Promise<number> {
   return chunks.length;
 }
 
-// ─── Main ─────────────────────────────────────────────────────────────────────
+// ─── ingestAll — callable from API ───────────────────────────────────────────
 
-async function main(): Promise<void> {
+export async function ingestAll(): Promise<{
+  totalChunks: number;
+  failedUrls: number;
+}> {
   log.info({ urlCount: SOURCE_URLS.length }, 'Starting RAG ingestion');
   let totalChunks = 0;
   let failedUrls = 0;
@@ -309,6 +312,14 @@ async function main(): Promise<void> {
     { totalChunks, failedUrls, totalUrls: SOURCE_URLS.length },
     'Ingestion complete',
   );
+  return { totalChunks, failedUrls };
+}
+
+// ─── CLI entry point ──────────────────────────────────────────────────────────
+
+async function main(): Promise<void> {
+  const result = await ingestAll();
+  log.info(result, 'Ingestion pipeline finished');
   await pool.end();
 }
 
