@@ -9,7 +9,7 @@ Multi-agent GitHub support resolution system. Takes an incoming support case,
 gathers evidence via RAG + MCP tools, and decides: resolve / clarify / escalate.
 
 **Current phase:** Update this line when you advance a phase.
-CURRENT_PHASE=1
+CURRENT_PHASE=2
 
 ## Monorepo Layout
 
@@ -21,6 +21,7 @@ packages/
 ```
 
 Run everything:
+
 ```bash
 docker compose up -d              # Postgres+pgvector + Redis
 npm run dev --workspace=packages/backend
@@ -77,13 +78,13 @@ npm run typecheck --workspaces
 
 Use the correct class — never throw plain `new Error()`:
 
-| Class            | When to use                          |
-|------------------|--------------------------------------|
-| DatabaseError    | Any pg query failure                 |
-| McpToolError     | Any MCP tool call failure            |
-| ValidationError  | Zod parse failure, bad input         |
-| AgentError       | Agent reasoning or LLM call failure  |
-| RagError         | Embedding or vector search failure   |
+| Class           | When to use                         |
+| --------------- | ----------------------------------- |
+| DatabaseError   | Any pg query failure                |
+| McpToolError    | Any MCP tool call failure           |
+| ValidationError | Zod parse failure, bad input        |
+| AgentError      | Agent reasoning or LLM call failure |
+| RagError        | Embedding or vector search failure  |
 
 ## Shared Types
 
@@ -93,38 +94,39 @@ Never re-declare `CaseContext`, `AgentFinding`, `CaseOutcome`, `RagChunk`,
 
 ## Phase Gate — What's In Scope
 
-| Phase | Scope                              | Key files                              |
-|-------|------------------------------------|----------------------------------------|
-| 1     | Monorepo, schema, seed, config     | schema.sql, env.ts, errors/, types/    |
-| 2     | RAG ingestion + retrieval          | rag/ingest.ts, rag/retrieve.ts         |
-| 3     | MCP server + 8 tools               | mcp-server/src/server.ts               |
-| 4     | All 6 agents + direct tools        | agents/*.ts, tools/*.ts                |
-| 5     | Express API + SSE streaming        | api/app.ts, api/cases.router.ts        |
-| 6     | Angular dashboard                  | frontend/src/app/**                    |
-| 7     | Scenarios, README, docs            | SCENARIOS.md, README.md                |
+| Phase | Scope                          | Key files                           |
+| ----- | ------------------------------ | ----------------------------------- |
+| 1     | Monorepo, schema, seed, config | schema.sql, env.ts, errors/, types/ |
+| 2     | RAG ingestion + retrieval      | rag/ingest.ts, rag/retrieve.ts      |
+| 3     | MCP server + 8 tools           | mcp-server/src/server.ts            |
+| 4     | All 6 agents + direct tools    | agents/_.ts, tools/_.ts             |
+| 5     | Express API + SSE streaming    | api/app.ts, api/cases.router.ts     |
+| 6     | Angular dashboard              | frontend/src/app/\*\*               |
+| 7     | Scenarios, README, docs        | SCENARIOS.md, README.md             |
 
 When asked to build something, check CURRENT_PHASE above.
 If the request is for a future phase, say so and ask for confirmation.
 
 ## Agent → Scenario Map
 
-| Agent              | Scenarios | Key MCP tools                                    |
-|--------------------|-----------|--------------------------------------------------|
-| OrchestratorAgent  | all       | get_org_context, get_case_history                |
-| BillingPlanAgent   | 2, 8      | check_subscription, check_invoice_status         |
-| EntitlementsAgent  | 1         | check_entitlement, check_subscription            |
-| AuthTokenAgent     | 3, 5, 6   | get_token_record, get_saml_config                |
-| ApiRateLimitAgent  | 4         | check_api_usage + check_service_status (direct)  |
-| ResolutionAgent    | all       | create_escalation (direct, if escalating)        |
+| Agent             | Scenarios | Key MCP tools                                   |
+| ----------------- | --------- | ----------------------------------------------- |
+| OrchestratorAgent | all       | get_org_context, get_case_history               |
+| BillingPlanAgent  | 2, 8      | check_subscription, check_invoice_status        |
+| EntitlementsAgent | 1         | check_entitlement, check_subscription           |
+| AuthTokenAgent    | 3, 5, 6   | get_token_record, get_saml_config               |
+| ApiRateLimitAgent | 4         | check_api_usage + check_service_status (direct) |
+| ResolutionAgent   | all       | create_escalation (direct, if escalating)       |
 
 ## MCP Server
 
 Location: `packages/mcp-server/src/server.ts`
 Transport: `StdioServerTransport` (spawned as child process by backend)
 Tools: get_org_context, check_subscription, check_entitlement, get_token_record,
-       get_saml_config, check_api_usage, get_case_history, check_invoice_status
+get_saml_config, check_api_usage, get_case_history, check_invoice_status
 
 Each tool must:
+
 1. Validate input with Zod
 2. Query DB with parameterized SQL
 3. Return `{ content: [{ type: 'text', text: JSON.stringify(result) }] }`
@@ -133,6 +135,7 @@ Each tool must:
 ## RAG Retrieval SQL
 
 Always use this exact query — never modify it:
+
 ```sql
 SELECT chunk_id, source_url, section_heading, chunk_text,
   1 - (embedding <=> $1::vector) AS score
@@ -144,6 +147,7 @@ LIMIT $2;
 ## Anthropic SDK Call Pattern
 
 Always use this — never deviate:
+
 ```typescript
 const response = await anthropic.messages.create({
   model: 'claude-sonnet-4-20250514',
@@ -152,14 +156,15 @@ const response = await anthropic.messages.create({
   messages: [{ role: 'user', content: userContent }],
 });
 const text = response.content
-  .filter(b => b.type === 'text')
-  .map(b => b.text)
+  .filter((b) => b.type === 'text')
+  .map((b) => b.text)
   .join('');
 ```
 
 ## Angular Patterns (Phase 6)
 
 Every component must have:
+
 - `standalone: true`
 - `changeDetection: ChangeDetectionStrategy.OnPush`
 - `inject()` for all DI (no constructor injection)
@@ -168,18 +173,20 @@ Every component must have:
 - Signal Forms (`form()` / `field()`) for any form
 
 App config must include:
+
 - `provideExperimentalZonelessChangeDetection()`
 - `provideAnimationsAsync()`
 
 ## File Naming Conventions
 
-Backend:  `kebab-case.agent.ts`, `kebab-case.tool.ts`, `kebab-case.router.ts`
+Backend: `kebab-case.agent.ts`, `kebab-case.tool.ts`, `kebab-case.router.ts`
 Frontend: `kebab-case.component.ts/html/scss/spec.ts` (one folder per component)
-Tests:    `*.spec.ts` colocated, Vitest syntax everywhere
+Tests: `*.spec.ts` colocated, Vitest syntax everywhere
 
 ## Environment Variables
 
 Required (validated at startup by Zod in src/config/env.ts):
+
 ```
 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/github_support
 REDIS_URL=redis://localhost:6379
@@ -212,12 +219,12 @@ MCP_SERVER_PATH=../mcp-server/dist/server.js
 
 ## Useful Shortcuts for Claude Code
 
-When I say...                     | Do this
-----------------------------------|------------------------------------------
-"scaffold phase N"                | Generate all files listed for that phase
-"run scenario N"                  | Execute test with pre-seeded scenario data
-"check types"                     | Run `npm run typecheck --workspaces`
-"ingest docs"                     | Run `npm run ingest -w packages/backend`
-"reset db"                        | Drop + recreate schema, re-run seed
-"add tool <name>"                 | Add to mcp-server/src/server.ts with Zod schema
-"add agent <name>"                | Scaffold agent class in packages/backend/src/agents/
+| When I say...      | Do this                                              |
+| ------------------ | ---------------------------------------------------- |
+| "scaffold phase N" | Generate all files listed for that phase             |
+| "run scenario N"   | Execute test with pre-seeded scenario data           |
+| "check types"      | Run `npm run typecheck --workspaces`                 |
+| "ingest docs"      | Run `npm run ingest -w packages/backend`             |
+| "reset db"         | Drop + recreate schema, re-run seed                  |
+| "add tool <name>"  | Add to mcp-server/src/server.ts with Zod schema      |
+| "add agent <name>" | Scaffold agent class in packages/backend/src/agents/ |
