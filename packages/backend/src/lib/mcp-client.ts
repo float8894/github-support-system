@@ -1,8 +1,15 @@
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { env } from '../config/env.js';
 import { McpToolError } from '../errors/index.js';
 import { logger } from './logger.js';
+
+// Resolve MCP_SERVER_PATH relative to packages/backend/ (two dirs up from src/lib/)
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const backendRoot = resolve(__dirname, '../../');
+const resolvedMcpPath = resolve(backendRoot, env.MCP_SERVER_PATH);
 
 const log = logger.child({ service: 'mcp-client' });
 
@@ -18,11 +25,11 @@ class McpClient {
     }
 
     this.connectPromise = (async () => {
-      log.info({ path: env.MCP_SERVER_PATH }, 'Connecting to MCP server');
+      log.info({ path: resolvedMcpPath }, 'Connecting to MCP server');
 
       const transport = new StdioClientTransport({
         command: 'node',
-        args: [env.MCP_SERVER_PATH],
+        args: [resolvedMcpPath],
         env: {
           DATABASE_URL: env.DATABASE_URL,
           REDIS_URL: env.REDIS_URL,
