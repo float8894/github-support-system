@@ -9,7 +9,7 @@ Multi-agent GitHub support resolution system. Takes an incoming support case,
 gathers evidence via RAG + MCP tools, and decides: resolve / clarify / escalate.
 
 **Current phase:** Update this line when you advance a phase.
-CURRENT_PHASE=6
+CURRENT_PHASE=7
 
 ## Monorepo Layout
 

@@ -13,7 +13,8 @@
     "db:migrate": "psql $DATABASE_URL -f src/db/schema.sql",
     "db:seed": "node --env-file=../../.env --import tsx/esm src/db/seed.ts",
     "seed": "node --env-file=../../.env --import tsx/esm src/db/seed.ts",
-    "ingest": "node --env-file=../../.env --import tsx/esm src/rag/ingest.ts"
+    "ingest": "node --env-file=../../.env --import tsx/esm src/rag/ingest.ts",
+    "scenarios:capture": "node --env-file=../../.env --import tsx/esm src/capture-scenarios.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",

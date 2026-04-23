@@ -12,19 +12,19 @@ This is a **monorepo** containing:
 
 ### Tech Stack
 
-| Component | Technology |
-|-----------|-----------|
-| Runtime | Node 24.x |
-| Language | TypeScript 5.x (strict mode) |
-| Backend | Express 5 |
-| Database | PostgreSQL 17 + pgvector 0.2 |
-| Cache | Redis 7 |
-| LLM | Claude Sonnet 4 (via Anthropic SDK) |
-| Embeddings | OpenAI text-embedding-3-small |
-| MCP | @modelcontextprotocol/sdk ^1.10 |
-| Frontend | Angular 21 (standalone + signals) |
-| UI Library | Angular Material 21 |
-| Testing | Vitest |
+| Component  | Technology                          |
+| ---------- | ----------------------------------- |
+| Runtime    | Node 24.x                           |
+| Language   | TypeScript 5.x (strict mode)        |
+| Backend    | Express 5                           |
+| Database   | PostgreSQL 17 + pgvector 0.2        |
+| Cache      | Redis 7                             |
+| LLM        | Claude Sonnet 4 (via Anthropic SDK) |
+| Embeddings | OpenAI text-embedding-3-small       |
+| MCP        | @modelcontextprotocol/sdk ^1.10     |
+| Frontend   | Angular 21 (standalone + signals)   |
+| UI Library | Angular Material 21                 |
+| Testing    | Vitest                              |
 
 ## 📋 Prerequisites
 
@@ -64,169 +64,134 @@ npm run docker:up
 ```
 
 This starts:
+
 - PostgreSQL 17 with pgvector (port **5434**)
 - Redis 7 (port **6380**)
 
-### 4. Seed Database
+### 4. Migrate and Seed Database
 
 ```bash
-npm run db:seed
+# Apply schema
+npm run db:migrate -w packages/backend
+
+# Seed test data (12 cases, 8 scenarios + historical sub-cases)
+npm run db:seed -w packages/backend
 ```
 
-This creates:
-- 3 customers
-- 3 GitHub organizations
-- 1 enterprise account
-- 8 test scenarios covering all issue categories
+### 5. Ingest RAG Corpus
 
-### 5. Run Services
-
-**Terminal 1 - Backend API:**
 ```bash
-npm run dev:backend
+# Fetch and embed 22 GitHub Docs pages into pgvector
+npm run ingest -w packages/backend
 ```
 
-**Terminal 2 - MCP Server (Phase 3+):**
+This may take 2–3 minutes on first run (22 HTTP fetches + OpenAI embedding calls).
+
+### 6. Start All Services
+
+Open three terminals:
+
+**Terminal 1 — MCP Server:**
+
 ```bash
 npm run dev:mcp
 ```
 
-**Terminal 3 - Frontend (Phase 6+):**
+**Terminal 2 — Backend API (port 3000):**
+
+```bash
+npm run dev:backend
+```
+
+**Terminal 3 — Angular Frontend (port 4200):**
+
 ```bash
 npm run dev:frontend
 ```
 
-## 🏃 Development Workflow
+Then open [http://localhost:4200](http://localhost:4200).
 
-### Phase 1 ✅ — Foundation (COMPLETED)
+## 🏃 Build Phases — All Complete
 
-- [x] Monorepo structure
-- [x] Docker Compose (Postgres + Redis)
-- [x] Database schema (16 tables)
-- [x] Seed script (8 scenarios)
-- [x] Core libraries (env, logger, database, redis)
-- [x] Type definitions
-- [x] Error classes
-
-**Status:** All Phase 1 files created. Ready to run `docker compose up` and `npm run db:seed`.
-
-### Phase 2 — RAG Corpus Ingestion
-
-**Goal:** Ingest 22 GitHub Docs URLs into pgvector
-
-**Files to create:**
-- `packages/backend/src/rag/ingest.ts`
-- `packages/backend/src/rag/retrieve.ts`
-
-**Acceptance criteria:**
-- `tsx src/rag/ingest.ts` populates `document_chunks` table
-- `retrieveChunks('token expired')` returns scored results
-
-### Phase 3 — MCP Server
-
-**Goal:** Standalone MCP stdio server with 8 tools
-
-**Files to create:**
-- `packages/mcp-server/src/server.ts`
-
-**Tools to implement:**
-1. `get_org_context`
-2. `check_subscription`
-3. `check_entitlement`
-4. `get_token_record`
-5. `get_saml_config`
-6. `check_api_usage`
-7. `get_case_history`
-8. `check_invoice_status`
-
-### Phase 4 — Agent Pipeline
-
-**Goal:** All 6 agent classes + direct tools
-
-**Files to create:**
-- `packages/backend/src/agents/orchestrator.agent.ts`
-- `packages/backend/src/agents/billing-plan.agent.ts`
-- `packages/backend/src/agents/entitlements.agent.ts`
-- `packages/backend/src/agents/auth-token.agent.ts`
-- `packages/backend/src/agents/api-rate-limit.agent.ts`
-- `packages/backend/src/agents/resolution.agent.ts`
-- `packages/backend/src/tools/service-status.tool.ts`
-- `packages/backend/src/tools/escalation.tool.ts`
-
-### Phase 5 — Express API + SSE
-
-**Goal:** REST API with Server-Sent Events
-
-**Files to create:**
-- `packages/backend/src/api/app.ts`
-- `packages/backend/src/api/cases.router.ts`
-- `packages/backend/src/api/middleware/*`
-- `packages/backend/src/index.ts`
-
-### Phase 6 — Angular Frontend
-
-**Goal:** Internal support dashboard
-
-**Files to create:**
-- `packages/frontend/src/app/app.config.ts`
-- `packages/frontend/src/app/app.routes.ts`
-- `packages/frontend/src/app/core/services/*`
-- `packages/frontend/src/app/features/*`
-
-### Phase 7 — Testing & Documentation
-
-**Goal:** Run all scenarios, capture outputs
-
-**Files to create:**
-- `SCENARIOS.md`
-- `DESIGN_NOTE.md`
-- `LIMITATIONS.md`
+| Phase | Scope                       | Status      |
+| ----- | --------------------------- | ----------- |
+| 1     | Foundation & Data Model     | ✅ Complete |
+| 2     | RAG Corpus Ingestion        | ✅ Complete |
+| 3     | MCP Server (8 tools)        | ✅ Complete |
+| 4     | Agent Pipeline (6 agents)   | ✅ Complete |
+| 5     | Express API + SSE Streaming | ✅ Complete |
+| 6     | Angular Frontend            | ✅ Complete |
+| 7     | Scenarios & Documentation   | ✅ Complete |
 
 ## 📊 Database Schema
 
 **16 tables organized by domain:**
 
 ### Customer & Organization
+
 - `customers`
 - `enterprise_accounts`
 - `github_orgs`
 
 ### Billing
+
 - `subscriptions`
 - `invoices`
 
 ### Access Control
+
 - `entitlements`
 - `token_records`
 - `saml_configs`
 
 ### API Usage
+
 - `api_usage`
 
 ### Support
+
 - `support_cases`
 - `case_history`
 - `escalations`
 
 ### Service Health
+
 - `service_status`
 - `incidents`
 
 ### RAG
+
 - `document_chunks` (with vector embeddings)
 
-## 🧪 Test Scenarios
+## 🎬 Running Scenarios
 
-| # | Scenario | Primary Agent | Expected Verdict |
-|---|----------|---------------|------------------|
-| S1 | Feature entitlement dispute | EntitlementsAgent | resolve or escalate |
-| S2 | Paid features locked | BillingPlanAgent | resolve |
-| S3 | PAT failing for org resources | AuthTokenAgent | resolve |
-| S4 | REST API rate limit | ApiRateLimitAgent | resolve |
-| S5 | SAML SSO login failure | AuthTokenAgent | resolve or escalate |
-| S6 | Repeated auth issues | AuthTokenAgent | escalate (auto) |
-| S7 | Ambiguous complaint | OrchestratorAgent | clarify |
-| S8 | Billing + technical | BillingPlanAgent | resolve or escalate |
+### Option A — Headless (all 8 scenarios, writes JSON)
+
+```bash
+npm run scenarios:capture -w packages/backend
+# Output: scenarios-output.json at repo root
+```
+
+All 12 DB cases run through the full pipeline. Expected: **12 passed, 0 failed**.
+
+### Option B — Angular UI
+
+Navigate to [http://localhost:4200/scenarios](http://localhost:4200/scenarios) and click **Run All Scenarios** to watch live SSE streaming for each case.
+
+## 🧪 Scenario Results
+
+| #   | Title                                | Primary Agent     | Actual Verdict       |
+| --- | ------------------------------------ | ----------------- | -------------------- |
+| S1  | GitHub Actions minutes not available | EntitlementsAgent | `escalate`           |
+| S2  | All premium features suddenly locked | BillingPlanAgent  | `resolve`            |
+| S3  | PAT returns 403 for org repos        | AuthTokenAgent    | `resolve`            |
+| S4  | Getting rate limited on REST API     | ApiRateLimitAgent | `resolve`            |
+| S5  | SAML SSO authentication fails        | AuthTokenAgent    | `escalate`           |
+| S6  | Repeated token auth failure (×4)     | AuthTokenAgent    | `escalate` (auto ≥3) |
+| S7  | GitHub not working (vague)           | OrchestratorAgent | `clarify`            |
+| S8  | Advanced Security not provisioned    | EntitlementsAgent | `escalate`           |
+
+See [SCENARIOS.md](./SCENARIOS.md) for full pipeline traces, MCP tool calls, RAG citations, customer responses, and internal notes for every scenario.
 
 ## 🔧 Project Structure
 
@@ -278,18 +243,18 @@ npm run docker:up
 ### Port Conflicts
 
 Default ports:
+
 - **3000** — Backend API
 - **4200** — Frontend
-- **5432** — PostgreSQL
-- **6379** — Redis
+- **5434** — PostgreSQL (non-default to avoid conflicts)
+- **6380** — Redis (non-default to avoid conflicts)
 
-Change in `.env` if needed.
+Change in `.env` and `docker-compose.yml` if needed.
 
-## 📚 Additional Resources
+## 📚 Documentation
 
-- [Phase-by-phase implementation guide](./.claude/CLAUDE_PROJECT_INSTRUCTIONS.md)
-- [Node 24 patterns](/mnt/skills/user/node24/SKILL.md)
-- [Angular 21 patterns](/mnt/skills/user/angular21/SKILL.md)
+- [SCENARIOS.md](./SCENARIOS.md) — Live pipeline outputs for all 8 scenarios with RAG citations, MCP tool calls, customer responses, and internal notes
+- [DESIGN_NOTE.md](./DESIGN_NOTE.md) — Architecture decisions: multi-agent design, MCP stdio transport, RAG corpus, auto-escalation rules, SSE streaming
 
 ## 📝 License
 
