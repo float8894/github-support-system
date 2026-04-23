@@ -12,8 +12,8 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Router } from '@angular/router';
-import { CaseService } from '../../core/services/case.service.js';
-import type { CaseSeverity, SupportCase } from '../../types/index.js';
+import { CaseService } from '../../core/services/case.service';
+import type { CaseSeverity, SupportCase } from '../../types/index';
 
 interface ScenarioCard {
   id: number;

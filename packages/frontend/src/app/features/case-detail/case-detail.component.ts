@@ -14,11 +14,11 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { CaseService } from '../../core/services/case.service.js';
-import { EventSourceService } from '../../core/services/event-source.service.js';
-import { AgentEventCardComponent } from '../../shared/components/agent-event-card/agent-event-card.component.js';
-import { OutcomeCardComponent } from '../../shared/components/outcome-card/outcome-card.component.js';
-import type { AgentEvent, CaseOutcome } from '../../types/index.js';
+import { CaseService } from '../../core/services/case.service';
+import { EventSourceService } from '../../core/services/event-source.service';
+import { AgentEventCardComponent } from '../../shared/components/agent-event-card/agent-event-card.component';
+import { OutcomeCardComponent } from '../../shared/components/outcome-card/outcome-card.component';
+import type { AgentEvent, CaseOutcome } from '../../types/index';
 
 @Component({
   selector: 'app-case-detail',

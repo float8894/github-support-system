@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { MatChipsModule } from '@angular/material/chips';
-import type { CaseSeverity } from '../../../types/index.js';
+import type { CaseSeverity } from '../../../types/index';
 
 @Component({
   selector: 'app-severity-badge',

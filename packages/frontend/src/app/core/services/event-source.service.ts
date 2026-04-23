@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import type { AgentEvent } from '../../types/index.js';
+import type { AgentEvent } from '../../types/index';
 
 @Injectable({ providedIn: 'root' })
 export class EventSourceService {

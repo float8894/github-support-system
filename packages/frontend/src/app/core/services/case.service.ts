@@ -5,7 +5,7 @@ import type {
   CaseOutcome,
   CreateCaseRequest,
   SupportCase,
-} from '../../types/index.js';
+} from '../../types/index';
 
 @Injectable({ providedIn: 'root' })
 export class CaseService {

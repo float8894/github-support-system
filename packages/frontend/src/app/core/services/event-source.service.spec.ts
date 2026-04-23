@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { AgentEvent } from '../../types/index.js';
-import { EventSourceService } from './event-source.service.js';
+import type { AgentEvent } from '../../types/index';
+import { EventSourceService } from './event-source.service';
 
 const makeEvent = (type: AgentEvent['event']): AgentEvent => ({
   event: type,

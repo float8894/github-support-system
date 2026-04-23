@@ -14,8 +14,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { Router, RouterLink } from '@angular/router';
-import { CaseService } from '../../core/services/case.service.js';
-import type { CaseSeverity } from '../../types/index.js';
+import { CaseService } from '../../core/services/case.service';
+import type { CaseSeverity } from '../../types/index';
 
 @Component({
   selector: 'app-case-submit',

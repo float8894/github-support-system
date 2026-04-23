@@ -5,8 +5,8 @@ import {
 } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import type { CaseOutcome, SupportCase } from '../../types/index.js';
-import { CaseService } from './case.service.js';
+import type { CaseOutcome, SupportCase } from '../../types/index';
+import { CaseService } from './case.service';
 
 describe('CaseService', () => {
   let service: CaseService;

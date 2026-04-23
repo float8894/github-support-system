@@ -9,9 +9,9 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { basename, join } from 'node:path';
 import { of, throwError } from 'rxjs';
 import { beforeAll, describe, expect, it, vi } from 'vitest';
-import { CaseService } from '../../core/services/case.service.js';
-import type { SupportCase } from '../../types/index.js';
-import { ScenarioRunnerComponent } from './scenario-runner.component.js';
+import { CaseService } from '../../core/services/case.service';
+import type { SupportCase } from '../../types/index';
+import { ScenarioRunnerComponent } from './scenario-runner.component';
 
 const seededCases: SupportCase[] = [
   {

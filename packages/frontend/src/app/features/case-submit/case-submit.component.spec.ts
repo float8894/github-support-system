@@ -14,7 +14,7 @@ import { fireEvent, render, screen } from '@testing-library/angular';
 import { readdirSync, readFileSync } from 'node:fs';
 import { basename, join } from 'node:path';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { CaseSubmitComponent } from './case-submit.component.js';
+import { CaseSubmitComponent } from './case-submit.component';
 
 const providers = [
   provideZonelessChangeDetection(),

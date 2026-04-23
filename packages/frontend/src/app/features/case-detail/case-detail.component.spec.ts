@@ -9,10 +9,10 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { basename, join } from 'node:path';
 import { of, Subject, throwError } from 'rxjs';
 import { beforeAll, describe, expect, it, vi } from 'vitest';
-import { CaseService } from '../../core/services/case.service.js';
-import { EventSourceService } from '../../core/services/event-source.service.js';
-import type { AgentEvent, CaseOutcome } from '../../types/index.js';
-import { CaseDetailComponent } from './case-detail.component.js';
+import { CaseService } from '../../core/services/case.service';
+import { EventSourceService } from '../../core/services/event-source.service';
+import type { AgentEvent, CaseOutcome } from '../../types/index';
+import { CaseDetailComponent } from './case-detail.component';
 
 const makeEvent = (type: AgentEvent['event']): AgentEvent => ({
   event: type,
