@@ -1,0 +1,182 @@
+// Per-type color map via CSS custom properties
+.event-type-triage {
+  --evt-color: #58a6ff;
+  --evt-bg: rgba(88, 166, 255, 0.12);
+}
+.event-type-routing {
+  --evt-color: #bc8cff;
+  --evt-bg: rgba(188, 140, 255, 0.12);
+}
+.event-type-agent_start {
+  --evt-color: #d29922;
+  --evt-bg: rgba(210, 153, 34, 0.12);
+}
+.event-type-agent_done {
+  --evt-color: #3fb950;
+  --evt-bg: rgba(63, 185, 80, 0.12);
+}
+.event-type-rag_retrieved {
+  --evt-color: #39c5cf;
+  --evt-bg: rgba(57, 197, 207, 0.12);
+}
+.event-type-tool_called {
+  --evt-color: #f0883e;
+  --evt-bg: rgba(240, 136, 62, 0.12);
+}
+.event-type-verdict {
+  --evt-color: #bc8cff;
+  --evt-bg: rgba(188, 140, 255, 0.15);
+}
+.event-type-complete {
+  --evt-color: #3fb950;
+  --evt-bg: rgba(63, 185, 80, 0.15);
+}
+.event-type-error {
+  --evt-color: #f85149;
+  --evt-bg: rgba(248, 81, 73, 0.12);
+}
+
+.event-entry {
+  display: flex;
+  padding: 0 20px;
+  animation: event-slide-in 200ms ease both;
+}
+
+@keyframes event-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+// Timeline column
+.event-timeline {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 36px;
+  flex-shrink: 0;
+  padding-top: 12px;
+}
+
+.event-dot {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--evt-bg, rgba(88, 166, 255, 0.1));
+  border: 1.5px solid var(--evt-color, #58a6ff);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+
+  mat-icon {
+    font-size: 13px;
+    width: 13px;
+    height: 13px;
+    color: var(--evt-color, #58a6ff);
+  }
+}
+
+.event-connector {
+  width: 1.5px;
+  flex: 1;
+  min-height: 10px;
+  background: var(--border-subtle);
+  margin-top: 3px;
+}
+
+.event-entry:last-child .event-connector {
+  display: none;
+}
+
+// Content column
+.event-content {
+  flex: 1;
+  padding: 8px 0 12px 14px;
+}
+
+.event-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+
+.event-type-tag {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.7px;
+  color: var(--evt-color, #58a6ff);
+  background: var(--evt-bg, rgba(88, 166, 255, 0.1));
+  padding: 1px 6px;
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--evt-color, #58a6ff);
+}
+
+.event-agent {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: var(--bg-overlay);
+  padding: 1px 7px;
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--border-subtle);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.event-time {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-left: auto;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.event-message {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-primary);
+  line-height: 1.55;
+}
+
+.expand-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-top: 6px;
+  padding: 2px 8px 2px 4px;
+  font-size: 10px;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  color: var(--text-secondary);
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xs);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  letter-spacing: 0.2px;
+
+  mat-icon {
+    font-size: 13px;
+    width: 13px;
+    height: 13px;
+  }
+
+  &:hover {
+    color: var(--text-primary);
+    background: var(--bg-hover);
+    border-color: var(--border-default);
+  }
+}
+
+.event-data {
+  margin-top: 8px;
+  font-size: 11px;
+}

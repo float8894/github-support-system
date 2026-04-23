@@ -1,0 +1,75 @@
+<div class="page-container detail-page">
+  <!-- Page header -->
+  <div class="detail-header">
+    <a class="back-link" routerLink="/">
+      <mat-icon>arrow_back</mat-icon>
+      <span>Back</span>
+    </a>
+    <div class="detail-title-row">
+      <div class="detail-title-icon"><mat-icon>receipt_long</mat-icon></div>
+      <div>
+        <h2 class="detail-title">Case Details</h2>
+        <div class="detail-case-id">{{ caseId() }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Running banner -->
+  @if (isRunning()) {
+    <div class="banner banner-info pipeline-banner">
+      <mat-spinner diameter="18" />
+      <span>Agent pipeline running — streaming events in real time…</span>
+      <div class="pulse-bar"><div class="pulse-fill"></div></div>
+    </div>
+  }
+
+  <!-- Error banner -->
+  @if (error()) {
+    <div class="banner banner-error">
+      <mat-icon>error_outline</mat-icon>
+      {{ error() }}
+    </div>
+  }
+
+  <!-- Main content -->
+  <div class="detail-body" [class.has-outcome]="isComplete()">
+    <!-- Pipeline events -->
+    @if (agentEvents().length > 0) {
+      <div class="events-panel">
+        <div class="panel-header">
+          <div class="panel-header-left">
+            <mat-icon class="panel-icon">timeline</mat-icon>
+            <span class="panel-title">Agent Pipeline</span>
+            <span class="panel-count">{{ agentEvents().length }}</span>
+          </div>
+          @if (isRunning()) {
+            <span class="live-badge">
+              <span class="live-dot"></span>
+              LIVE
+            </span>
+          }
+        </div>
+        <div class="events-list">
+          @for (event of agentEvents(); track event.timestamp + event.event) {
+            <app-agent-event-card [event]="event" />
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Outcome -->
+    @if (isComplete()) {
+      <div class="outcome-panel">
+        <app-outcome-card [outcome]="outcome()!" />
+      </div>
+    }
+
+    <!-- Empty state -->
+    @if (!isRunning() && agentEvents().length === 0 && !error()) {
+      <div class="empty-state">
+        <mat-icon>hourglass_empty</mat-icon>
+        <p>Waiting for pipeline to start…</p>
+      </div>
+    }
+  </div>
+</div>

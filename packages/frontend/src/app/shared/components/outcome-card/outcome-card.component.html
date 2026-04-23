@@ -1,0 +1,137 @@
+<div class="outcome-card outcome-card--{{ outcome().verdict }}">
+  <!-- Verdict header -->
+  <div class="verdict-header">
+    <div class="verdict-icon-wrap">
+      <mat-icon>{{
+        outcome().verdict === 'resolve'
+          ? 'check_circle'
+          : outcome().verdict === 'escalate'
+            ? 'escalator_warning'
+            : 'help_outline'
+      }}</mat-icon>
+    </div>
+    <div class="verdict-text">
+      <div class="verdict-label">Verdict</div>
+      <div class="verdict-value">{{ outcome().verdict | uppercase }}</div>
+    </div>
+    <div class="issue-type-badge">{{ outcome().issue_type | uppercase }}</div>
+  </div>
+
+  <!-- Customer response -->
+  <section class="outcome-section">
+    <div class="section-label">
+      <mat-icon>chat</mat-icon>
+      Customer Response
+    </div>
+    <div class="response-body">{{ outcome().customer_response }}</div>
+  </section>
+
+  <!-- Key findings -->
+  @if (outcome().evidence.key_findings.length > 0) {
+    <section class="outcome-section">
+      <div class="section-label">
+        <mat-icon>insights</mat-icon>
+        Key Findings
+      </div>
+      <ul class="findings-list">
+        @for (finding of outcome().evidence.key_findings; track $index) {
+          <li class="finding-item">
+            <mat-icon>arrow_right</mat-icon>
+            <span>{{ finding }}</span>
+          </li>
+        }
+      </ul>
+    </section>
+  }
+
+  <!-- Evidence accordions -->
+  <div class="evidence-section">
+    @if (outcome().evidence.doc_citations.length > 0) {
+      <mat-expansion-panel class="evidence-panel">
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <mat-icon>library_books</mat-icon>
+            Documentation
+            <span class="evidence-count">{{
+              outcome().evidence.doc_citations.length
+            }}</span>
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        @for (chunk of outcome().evidence.doc_citations; track chunk.chunk_id) {
+          <div class="citation-item">
+            <div class="citation-header">
+              <a
+                [href]="chunk.source_url"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="citation-link"
+              >
+                <mat-icon>open_in_new</mat-icon>
+                {{ chunk.section_heading }}
+              </a>
+              <span class="citation-score">{{
+                chunk.score | number: '1.2-2'
+              }}</span>
+            </div>
+            <p class="citation-text">{{ chunk.chunk_text }}</p>
+          </div>
+        }
+      </mat-expansion-panel>
+    }
+
+    @if (outcome().evidence.tool_results.length > 0) {
+      <mat-expansion-panel class="evidence-panel">
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <mat-icon>build</mat-icon>
+            Tool Results
+            <span class="evidence-count">{{
+              outcome().evidence.tool_results.length
+            }}</span>
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        @for (tool of outcome().evidence.tool_results; track tool.tool_name) {
+          <div class="tool-result-item">
+            <div class="tool-name">
+              <mat-icon>terminal</mat-icon>
+              {{ tool.tool_name }}
+              @if (tool.error) {
+                <span class="tool-error-badge">ERROR</span>
+              }
+            </div>
+            <pre>{{ tool.output | json }}</pre>
+          </div>
+        }
+      </mat-expansion-panel>
+    }
+  </div>
+
+  <!-- Internal note -->
+  <div class="internal-note-row">
+    <button class="internal-note-toggle" (click)="toggleInternalNote()">
+      <mat-icon>{{
+        showInternalNote() ? 'visibility_off' : 'visibility'
+      }}</mat-icon>
+      {{ showInternalNote() ? 'Hide' : 'Show' }} Internal Note
+    </button>
+  </div>
+
+  @if (showInternalNote()) {
+    <section class="outcome-section internal-note">
+      <div class="section-label">
+        <mat-icon>lock</mat-icon>
+        Internal Note
+      </div>
+      <div class="response-body">{{ outcome().internal_note }}</div>
+    </section>
+  }
+
+  <!-- Escalation -->
+  @if (outcome().escalation_id) {
+    <div class="escalation-row">
+      <mat-icon>confirmation_number</mat-icon>
+      <span>Escalation ID:</span>
+      <code>{{ outcome().escalation_id }}</code>
+    </div>
+  }
+</div>

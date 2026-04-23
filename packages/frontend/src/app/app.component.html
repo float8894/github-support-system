@@ -1,0 +1,42 @@
+<header class="app-header">
+  <div class="header-inner">
+    <div class="brand">
+      <div class="brand-icon">
+        <mat-icon>support_agent</mat-icon>
+      </div>
+      <div class="brand-text">
+        <span class="brand-name">Support AI</span>
+        <span class="brand-sub">GitHub · Multi-Agent Resolution</span>
+      </div>
+    </div>
+
+    <nav class="nav-links">
+      <a
+        class="nav-link"
+        routerLink="/"
+        routerLinkActive="nav-link--active"
+        [routerLinkActiveOptions]="{ exact: true }"
+      >
+        <mat-icon>add_circle_outline</mat-icon>
+        <span>New Case</span>
+      </a>
+      <a
+        class="nav-link"
+        routerLink="/scenarios"
+        routerLinkActive="nav-link--active"
+      >
+        <mat-icon>science</mat-icon>
+        <span>Scenarios</span>
+      </a>
+    </nav>
+
+    <div class="header-status">
+      <span class="status-dot"></span>
+      <span class="status-text">System Online</span>
+    </div>
+  </div>
+</header>
+
+<main class="app-main">
+  <router-outlet />
+</main>

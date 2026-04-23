@@ -280,6 +280,18 @@ casesRouter.get('/cases/:id/stream', async (req: Request, res: Response) => {
   res.end();
 });
 
+// GET /api/cases — list support cases (newest first, limit 50)
+casesRouter.get('/cases', async (_req: Request, res: Response) => {
+  const rows = await query<SupportCase>(
+    `SELECT case_id, customer_id, org_id, title, description, severity, status, issue_category
+     FROM support_cases
+     ORDER BY created_at DESC
+     LIMIT 50`,
+    [],
+  );
+  res.json(rows);
+});
+
 // POST /api/ingest — admin-only RAG ingestion trigger
 casesRouter.post('/ingest', async (req: Request, res: Response) => {
   const key = req.headers['x-admin-key'];

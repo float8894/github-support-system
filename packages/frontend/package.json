@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "ng serve",
     "build": "ng build",
-    "test": "ng test",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "lint": "ng lint"
   },
   "dependencies": {
@@ -29,6 +30,7 @@
     "@angular/compiler-cli": "^21.0.0",
     "@testing-library/angular": "^17.3.3",
     "@types/node": "^24.0.0",
+    "jsdom": "^29.0.2",
     "typescript": "~5.9.0",
     "vitest": "^3.0.0"
   }

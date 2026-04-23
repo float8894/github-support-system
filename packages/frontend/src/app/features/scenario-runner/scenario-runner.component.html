@@ -1,0 +1,91 @@
+<div class="page-container">
+  <!-- Page header -->
+  <div class="runner-header">
+    <div>
+      <h2 class="section-heading">
+        <mat-icon>science</mat-icon>
+        Scenario Runner
+      </h2>
+      <p class="section-subheading">
+        8 pre-seeded test cases covering every agent and verdict type. Click
+        <strong>Run</strong> to trigger the full agent pipeline and watch it
+        live.
+      </p>
+    </div>
+
+    <div class="runner-stats">
+      <div class="stat">
+        <span class="stat-value">8</span>
+        <span class="stat-label">Scenarios</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat">
+        <span class="stat-value">5</span>
+        <span class="stat-label">Agents</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat">
+        <span class="stat-value">3</span>
+        <span class="stat-label">Verdicts</span>
+      </div>
+    </div>
+  </div>
+
+  @if (error()) {
+    <div class="banner banner-error">
+      <mat-icon>error_outline</mat-icon>
+      {{ error() }}
+    </div>
+  }
+
+  @if (loadingCases()) {
+    <div class="banner banner-info">
+      <mat-spinner diameter="18" />
+      <span>Loading seeded cases…</span>
+    </div>
+  }
+
+  <div class="scenarios-grid">
+    @for (scenario of scenarios; track scenario.id) {
+      <div
+        class="scenario-card"
+        [class.scenario-card--running]="runningScenarioId() === scenario.id"
+      >
+        <div class="scenario-card-top">
+          <div class="scenario-num">S{{ scenario.id }}</div>
+          <div class="scenario-agent-badge">{{ scenario.primaryAgent }}</div>
+        </div>
+
+        <h3 class="scenario-title">{{ scenario.title }}</h3>
+        <p class="scenario-desc">{{ scenario.description }}</p>
+
+        <div class="scenario-footer">
+          <div class="verdict-label">
+            <span class="verdict-key">Expected</span>
+            <span
+              class="verdict-val verdict-val--{{
+                getVerdictClass(scenario.expectedVerdict)
+              }}"
+              >{{ scenario.expectedVerdict }}</span
+            >
+          </div>
+
+          <button
+            class="run-btn"
+            [class.run-btn--loading]="runningScenarioId() === scenario.id"
+            [disabled]="runningScenarioId() === scenario.id || loadingCases()"
+            (click)="runScenario(scenario)"
+          >
+            @if (runningScenarioId() === scenario.id) {
+              <mat-spinner diameter="14" />
+              <span>Running…</span>
+            } @else {
+              <mat-icon>play_arrow</mat-icon>
+              <span>Run</span>
+            }
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+</div>

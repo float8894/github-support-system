@@ -1,0 +1,191 @@
+<div class="page-container submit-page">
+  <div class="form-layout">
+    <!-- Left: info panel -->
+    <aside class="info-panel">
+      <div class="info-badge">Phase 6 · Live</div>
+      <h1 class="info-title">
+        Submit a<br /><span class="gradient-text">Support Case</span>
+      </h1>
+      <p class="info-desc">
+        The multi-agent pipeline will triage, route, and resolve your case using
+        RAG-grounded evidence and real-time MCP tool calls.
+      </p>
+
+      <div class="info-steps">
+        <div class="step">
+          <div class="step-icon step-icon--blue">
+            <mat-icon>search</mat-icon>
+          </div>
+          <div class="step-content">
+            <span class="step-title">Triage &amp; Route</span>
+            <span class="step-desc"
+              >Orchestrator classifies the issue and selects specialist
+              agents</span
+            >
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-icon step-icon--purple">
+            <mat-icon>psychology</mat-icon>
+          </div>
+          <div class="step-content">
+            <span class="step-title">Agent Pipeline</span>
+            <span class="step-desc"
+              >Specialists gather evidence via MCP tools and RAG retrieval</span
+            >
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-icon step-icon--green">
+            <mat-icon>task_alt</mat-icon>
+          </div>
+          <div class="step-content">
+            <span class="step-title">Verdict &amp; Response</span>
+            <span class="step-desc"
+              >Resolution agent synthesises findings into an actionable
+              response</span
+            >
+          </div>
+        </div>
+      </div>
+
+      <div class="info-hint">
+        <mat-icon>lightbulb</mat-icon>
+        <span
+          >Paste seeded UUIDs from the DB or use the
+          <a class="hint-link" routerLink="/scenarios">Scenario Runner</a>
+          for pre-built test cases.
+        </span>
+      </div>
+    </aside>
+
+    <!-- Right: form -->
+    <div class="form-panel">
+      <div class="form-card">
+        <div class="form-card-header">
+          <div class="form-card-icon"><mat-icon>edit_document</mat-icon></div>
+          <div>
+            <div class="form-card-title">Case Details</div>
+            <div class="form-card-sub">
+              Fill in the fields below to initiate the pipeline
+            </div>
+          </div>
+        </div>
+
+        @if (error()) {
+          <div class="banner banner-error">
+            <mat-icon>error_outline</mat-icon>
+            {{ error() }}
+          </div>
+        }
+
+        <form [formGroup]="caseForm" (ngSubmit)="onSubmit()" class="case-form">
+          <div class="field-group">
+            <div class="field-label">Identifiers</div>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Customer ID (UUID)</mat-label>
+              <input
+                matInput
+                formControlName="customer_id"
+                placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+              />
+              <mat-icon matSuffix class="field-suffix">person</mat-icon>
+              @if (
+                caseForm.controls.customer_id.invalid &&
+                caseForm.controls.customer_id.touched
+              ) {
+                <mat-error>Valid UUID required</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Org ID (UUID)</mat-label>
+              <input
+                matInput
+                formControlName="org_id"
+                placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+              />
+              <mat-icon matSuffix class="field-suffix">corporate_fare</mat-icon>
+              @if (
+                caseForm.controls.org_id.invalid &&
+                caseForm.controls.org_id.touched
+              ) {
+                <mat-error>Valid UUID required</mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+          <div class="field-group">
+            <div class="field-label">Case Information</div>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Title</mat-label>
+              <input
+                matInput
+                formControlName="title"
+                placeholder="Brief description of the issue"
+              />
+              @if (
+                caseForm.controls.title.invalid &&
+                caseForm.controls.title.touched
+              ) {
+                <mat-error>Title must be at least 5 characters</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Description</mat-label>
+              <textarea
+                matInput
+                formControlName="description"
+                rows="5"
+                placeholder="Describe the issue in detail. The more context you provide, the better the agents can diagnose and resolve it."
+              ></textarea>
+              @if (
+                caseForm.controls.description.invalid &&
+                caseForm.controls.description.touched
+              ) {
+                <mat-error
+                  >Description is required (min 10 characters)</mat-error
+                >
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Severity</mat-label>
+              <mat-select formControlName="severity">
+                @for (s of severities; track s) {
+                  <mat-option [value]="s">
+                    <div class="severity-option severity-option--{{ s }}">
+                      <span class="severity-dot"></span>
+                      {{ s | titlecase }}
+                    </div>
+                  </mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="form-actions">
+            <button
+              mat-raised-button
+              color="primary"
+              type="submit"
+              class="submit-btn"
+              [disabled]="loading()"
+            >
+              <span class="btn-inner">
+                @if (loading()) {
+                  <mat-spinner diameter="16" />
+                  <span>Running pipeline…</span>
+                } @else {
+                  <mat-icon>rocket_launch</mat-icon>
+                  <span>Submit &amp; Run Pipeline</span>
+                }
+              </span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

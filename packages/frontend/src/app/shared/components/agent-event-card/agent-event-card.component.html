@@ -1,0 +1,30 @@
+<div class="event-entry" [class]="'event-type-' + event().event">
+  <!-- Timeline column -->
+  <div class="event-timeline">
+    <div class="event-dot">
+      <mat-icon>{{ icon() }}</mat-icon>
+    </div>
+    <div class="event-connector"></div>
+  </div>
+
+  <!-- Content -->
+  <div class="event-content">
+    <div class="event-meta">
+      <span class="event-type-tag">{{ event().event | uppercase }}</span>
+      @if (event().agentName) {
+        <span class="event-agent">{{ event().agentName }}</span>
+      }
+      <span class="event-time">{{ formattedTime() }}</span>
+    </div>
+    <p class="event-message">{{ event().message }}</p>
+    @if (hasData()) {
+      <button class="expand-btn" (click)="toggleExpand()">
+        <mat-icon>{{ expanded() ? 'expand_less' : 'expand_more' }}</mat-icon>
+        {{ expanded() ? 'Hide data' : 'Show data' }}
+      </button>
+      @if (expanded()) {
+        <pre class="event-data">{{ event().data | json }}</pre>
+      }
+    }
+  </div>
+</div>
