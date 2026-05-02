@@ -1,5 +1,8 @@
 import fetch from 'node-fetch';
 import { createHash } from 'node:crypto';
+import { readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import OpenAI from 'openai';
 import TurndownService from 'turndown';
 import { env } from '../config/env.js';
@@ -16,53 +19,16 @@ const turndown = new TurndownService({
   codeBlockStyle: 'fenced',
 });
 
-// ─── Source URLs ─────────────────────────────────────────────────────────────
+// ─── Source URLs (loaded from sources.txt) ───────────────────────────────────
 
-const SOURCE_URLS: string[] = [
-  'https://docs.github.com/en/get-started/learning-about-github/githubs-plans',
-  'https://docs.github.com/en/billing/managing-your-plan-and-licenses/about-per-user-pricing',
-  'https://docs.github.com/en/billing/managing-your-plan-and-licenses/upgrading-your-accounts-plan',
-  'https://docs.github.com/en/billing/managing-your-plan-and-licenses/downgrading-your-accounts-plan',
-  'https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens',
-  'https://docs.github.com/en/authentication/authenticating-with-saml-single-sign-on/about-authentication-with-saml-single-sign-on',
-  'https://docs.github.com/en/enterprise-cloud@latest/admin/managing-iam/understanding-iam-for-enterprises/about-saml-for-enterprise-iam',
-  'https://docs.github.com/en/enterprise-cloud@latest/admin/managing-iam/configuring-authentication-for-enterprise-managed-users/configuring-saml-single-sign-on-for-enterprise-managed-users',
-  'https://docs.github.com/en/enterprise-cloud@latest/admin/managing-iam/understanding-iam-for-enterprises/troubleshooting-authentication-for-your-enterprise',
-  'https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api',
-  'https://docs.github.com/en/rest/using-the-rest-api/troubleshooting-the-rest-api',
-  'https://docs.github.com/en/graphql/overview/resource-limitations',
-  'https://docs.github.com/en/actions/administering-github-actions/usage-limits-billing-and-administration',
-  'https://docs.github.com/en/code-security/getting-started/github-security-features',
-  'https://docs.github.com/en/organizations/managing-organization-settings/managing-security-and-analysis-settings-for-your-organization',
-  'https://docs.github.com/en/enterprise-cloud@latest/admin/enforcing-policies/enforcing-policies-for-your-enterprise/about-enterprise-policies',
-  'https://docs.github.com/en/enterprise-cloud@latest/billing/managing-the-plan-for-your-github-account/about-billing-for-your-enterprise',
-  'https://docs.github.com/en/support/learning-about-github-support/about-github-support',
-  'https://docs.github.com/en/get-started/using-github/troubleshooting-connectivity-problems',
-  'https://docs.github.com/en/authentication/troubleshooting-ssh/error-permission-denied-publickey',
-  'https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/about-authentication-with-a-github-app',
-  'https://docs.github.com/en/rest/overview/resources-in-the-rest-api',
-  // ── Brief-specified seed URLs (added to ensure full corpus coverage) ──────
-  'https://docs.github.com/en/get-started/using-github-docs/about-versions-of-github-docs',
-  'https://docs.github.com/en/billing',
-  'https://docs.github.com/en/billing/get-started/how-billing-works',
-  'https://docs.github.com/en/billing/how-tos/manage-plan-and-licenses',
-  'https://docs.github.com/billing/managing-the-plan-for-your-github-account/upgrading-your-accounts-plan',
-  'https://docs.github.com/en/billing/how-tos/manage-plan-and-licenses/downgrade-plan',
-  'https://docs.github.com/en/billing/how-tos/troubleshooting',
-  'https://docs.github.com/en/rest',
-  'https://docs.github.com/en/rest/quickstart',
-  'https://docs.github.com/en/rest/using-the-rest-api/getting-started-with-the-rest-api',
-  'https://docs.github.com/en/rest/authentication/authenticating-to-the-rest-api',
-  'https://docs.github.com/authentication/authenticating-with-saml-single-sign-on',
-  'https://docs.github.com/github/authenticating-to-github/authenticating-with-saml-single-sign-on/authorizing-a-personal-access-token-for-use-with-saml-single-sign-on',
-  'https://docs.github.com/en/organizations/managing-programmatic-access-to-your-organization/setting-a-personal-access-token-policy-for-your-organization',
-  'https://docs.github.com/en/enterprise-cloud@latest/organizations/managing-programmatic-access-to-your-organization/managing-requests-for-personal-access-tokens-in-your-organization',
-  'https://docs.github.com/en/enterprise-cloud@latest/organizations/managing-saml-single-sign-on-for-your-organization',
-  'https://docs.github.com/enterprise-cloud@latest/organizations/managing-saml-single-sign-on-for-your-organization/troubleshooting-identity-and-access-management-for-your-organization',
-  'https://docs.github.com/en/enterprise-cloud@latest/admin/managing-iam/using-saml-for-enterprise-iam/configuring-saml-single-sign-on-for-your-enterprise',
-  'https://docs.github.com/en/enterprise-cloud@latest/admin/managing-iam/using-saml-for-enterprise-iam/troubleshooting-saml-authentication',
-  'https://docs.github.com/enterprise-cloud@latest/admin/identity-and-access-management/using-saml-for-enterprise-iam/saml-configuration-reference',
-];
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const SOURCE_URLS: string[] = readFileSync(
+  join(__dirname, 'sources.txt'),
+  'utf8',
+)
+  .split('\n')
+  .map((line) => line.trim())
+  .filter((line) => line.length > 0 && !line.startsWith('#'));
 
 // ─── Fetch with retry ─────────────────────────────────────────────────────────
 
