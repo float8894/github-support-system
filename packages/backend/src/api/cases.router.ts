@@ -168,6 +168,11 @@ async function runPipeline(
         verdict: outcome.verdict,
         issue_type: outcome.issue_type,
         escalation_id: outcome.escalation_id ?? null,
+        key_findings: outcome.evidence.key_findings,
+        tools_used: outcome.evidence.tool_results.map((t) => t.tool_name),
+        doc_citations: outcome.evidence.doc_citations.map(
+          (c) => c.section_heading,
+        ),
       },
     }),
   );
