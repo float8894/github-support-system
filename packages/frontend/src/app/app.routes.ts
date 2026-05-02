@@ -16,6 +16,13 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'cases',
+    loadComponent: () =>
+      import('./features/case-list/case-list.component').then(
+        (m) => m.CaseListComponent,
+      ),
+  },
+  {
     path: 'scenarios',
     loadComponent: () =>
       import('./features/scenario-runner/scenario-runner.component').then(

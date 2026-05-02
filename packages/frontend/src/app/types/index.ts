@@ -48,6 +48,7 @@ export interface SupportCase {
   severity: CaseSeverity;
   status: CaseStatus;
   issue_category?: IssueCategory;
+  created_at?: string;
 }
 
 export interface RagChunk {

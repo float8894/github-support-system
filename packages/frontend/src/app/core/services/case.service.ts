@@ -26,4 +26,8 @@ export class CaseService {
   listCases(): Observable<SupportCase[]> {
     return this.http.get<SupportCase[]>('/api/cases');
   }
+
+  deleteCase(caseId: string): Observable<void> {
+    return this.http.delete<void>(`/api/cases/${caseId}`);
+  }
 }
