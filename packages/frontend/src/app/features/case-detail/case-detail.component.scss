@@ -34,7 +34,7 @@
 
 .detail-title-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 14px;
 }
 
@@ -71,6 +71,84 @@
   font-size: 12px;
   color: var(--text-muted);
   margin-top: 3px;
+}
+
+.case-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.meta-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  border: 1px solid transparent;
+}
+
+// severity
+.meta-severity--low {
+  background: rgba(48, 160, 88, 0.15);
+  color: #3fb950;
+  border-color: rgba(63, 185, 80, 0.3);
+}
+.meta-severity--medium {
+  background: rgba(210, 153, 34, 0.15);
+  color: #d29922;
+  border-color: rgba(210, 153, 34, 0.3);
+}
+.meta-severity--high {
+  background: rgba(219, 97, 28, 0.15);
+  color: #db6d1c;
+  border-color: rgba(219, 97, 28, 0.3);
+}
+.meta-severity--critical {
+  background: rgba(248, 81, 73, 0.15);
+  color: #f85149;
+  border-color: rgba(248, 81, 73, 0.3);
+}
+
+// status
+.meta-status--open {
+  background: rgba(88, 166, 255, 0.12);
+  color: #58a6ff;
+  border-color: rgba(88, 166, 255, 0.3);
+}
+.meta-status--resolved {
+  background: rgba(63, 185, 80, 0.12);
+  color: #3fb950;
+  border-color: rgba(63, 185, 80, 0.3);
+}
+.meta-status--escalated {
+  background: rgba(248, 81, 73, 0.12);
+  color: #f85149;
+  border-color: rgba(248, 81, 73, 0.3);
+}
+.meta-status--pending_clarification {
+  background: rgba(210, 153, 34, 0.12);
+  color: #d29922;
+  border-color: rgba(210, 153, 34, 0.3);
+}
+
+// category
+.meta-category {
+  background: rgba(188, 140, 255, 0.12);
+  color: #bc8cff;
+  border-color: rgba(188, 140, 255, 0.3);
+}
+
+.case-description {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 8px 0 0;
+  max-width: 680px;
+  line-height: 1.6;
 }
 
 // ─── Pipeline banner ──────────────────────────────────────────────────────

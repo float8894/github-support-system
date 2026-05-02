@@ -1,15 +1,38 @@
 <div class="page-container detail-page">
   <!-- Page header -->
   <div class="detail-header">
-    <a class="back-link" routerLink="/">
+    <a class="back-link" routerLink="/scenarios">
       <mat-icon>arrow_back</mat-icon>
       <span>Back</span>
     </a>
     <div class="detail-title-row">
       <div class="detail-title-icon"><mat-icon>receipt_long</mat-icon></div>
-      <div>
-        <h2 class="detail-title">Case Details</h2>
+      <div class="detail-title-content">
+        <h2 class="detail-title">
+          @if (caseDetails(); as c) {
+            {{ c.title }}
+          } @else {
+            Case Details
+          }
+        </h2>
         <div class="detail-case-id">{{ caseId() }}</div>
+        @if (caseDetails(); as c) {
+          <div class="case-meta">
+            <span
+              class="meta-badge meta-severity meta-severity--{{ c.severity }}"
+              >{{ c.severity }}</span
+            >
+            <span class="meta-badge meta-status meta-status--{{ c.status }}">{{
+              c.status
+            }}</span>
+            @if (c.issue_category) {
+              <span class="meta-badge meta-category">{{
+                c.issue_category
+              }}</span>
+            }
+          </div>
+          <p class="case-description">{{ c.description }}</p>
+        }
       </div>
     </div>
   </div>
