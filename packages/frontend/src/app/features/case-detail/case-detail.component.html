@@ -1,7 +1,7 @@
 <div class="page-container detail-page">
   <!-- Page header -->
   <div class="detail-header">
-    <a class="back-link" routerLink="/scenarios">
+    <a class="back-link" routerLink="/cases">
       <mat-icon>arrow_back</mat-icon>
       <span>Back</span>
     </a>
@@ -37,6 +37,37 @@
     </div>
   </div>
 
+  <!-- Action bar -->
+  <div class="action-bar">
+    @if (previousOutcome(); as prev) {
+      <span class="prev-verdict-label">
+        Last verdict:
+        <span class="badge badge-{{ prev.verdict }}">{{ prev.verdict }}</span>
+      </span>
+    } @else if (!pipelineStarted()) {
+      <span class="prev-verdict-label no-run">No previous run</span>
+    } @else {
+      <span></span>
+    }
+    <button
+      mat-flat-button
+      color="primary"
+      class="run-btn"
+      [disabled]="isRunning()"
+      (click)="runPipeline()"
+    >
+      @if (isRunning()) {
+        <mat-spinner diameter="16" />
+        <span>Running…</span>
+      } @else {
+        <mat-icon>rocket_launch</mat-icon>
+        <span>{{
+          previousOutcome() ? 'Re-run Pipeline' : 'Run Pipeline'
+        }}</span>
+      }
+    </button>
+  </div>
+
   <!-- Running banner -->
   @if (isRunning()) {
     <div class="banner banner-info pipeline-banner">
@@ -56,8 +87,30 @@
 
   <!-- Main content -->
   <div class="detail-body" [class.has-outcome]="isComplete()">
-    <!-- Pipeline events -->
-    @if (agentEvents().length > 0) {
+    <!-- Previous outcome (shown before a new run starts) -->
+    @if (!pipelineStarted() && previousOutcome(); as prev) {
+      <div class="prev-outcome-wrap">
+        <div class="prev-outcome-header">
+          <mat-icon>history</mat-icon>
+          <span>Previous Run Result</span>
+        </div>
+        <app-outcome-card [outcome]="prev" />
+      </div>
+    }
+
+    <!-- Never run -->
+    @if (!pipelineStarted() && !previousOutcome()) {
+      <div class="no-run-state">
+        <mat-icon>rocket_launch</mat-icon>
+        <p>
+          This case hasn&apos;t been run yet.<br />Click
+          <strong>Run Pipeline</strong> above to start the agent pipeline.
+        </p>
+      </div>
+    }
+
+    <!-- Pipeline events (shown once a run starts) -->
+    @if (pipelineStarted() && agentEvents().length > 0) {
       <div class="events-panel">
         <div class="panel-header">
           <div class="panel-header-left">
@@ -80,18 +133,10 @@
       </div>
     }
 
-    <!-- Outcome -->
+    <!-- Live outcome -->
     @if (isComplete()) {
       <div class="outcome-panel">
         <app-outcome-card [outcome]="outcome()!" />
-      </div>
-    }
-
-    <!-- Empty state -->
-    @if (!isRunning() && agentEvents().length === 0 && !error()) {
-      <div class="empty-state">
-        <mat-icon>hourglass_empty</mat-icon>
-        <p>Waiting for pipeline to start…</p>
       </div>
     }
   </div>

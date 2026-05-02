@@ -151,6 +151,49 @@
   line-height: 1.6;
 }
 
+// ─── Action bar ─────────────────────────────────────────────────────────────
+.action-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  padding: 12px 18px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.prev-verdict-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-secondary);
+
+  &.no-run {
+    color: var(--text-muted);
+    font-style: italic;
+  }
+}
+
+.run-btn {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 8px;
+
+  mat-icon {
+    font-size: 17px;
+    width: 17px;
+    height: 17px;
+  }
+
+  mat-spinner {
+    flex-shrink: 0;
+  }
+}
+
 // ─── Pipeline banner ──────────────────────────────────────────────────────
 .pipeline-banner {
   position: relative;
@@ -200,6 +243,57 @@
 
     @media (max-width: 960px) {
       grid-template-columns: 1fr;
+    }
+  }
+}
+
+// ─── Previous outcome / no-run states ───────────────────────────────────────
+.prev-outcome-wrap {
+  grid-column: 1 / -1;
+}
+
+.prev-outcome-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    color: var(--text-muted);
+  }
+}
+
+.no-run-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 24px;
+  gap: 16px;
+  color: var(--text-muted);
+
+  mat-icon {
+    font-size: 44px;
+    width: 44px;
+    height: 44px;
+    opacity: 0.35;
+  }
+
+  p {
+    font-size: 14px;
+    margin: 0;
+    color: var(--text-secondary);
+    text-align: center;
+    line-height: 1.7;
+
+    strong {
+      color: var(--text-primary);
     }
   }
 }

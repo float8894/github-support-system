@@ -45,19 +45,23 @@ export class CaseDetailComponent implements OnInit {
 
   agentEvents = signal<AgentEvent[]>([]);
   outcome = signal<CaseOutcome | null>(null);
+  previousOutcome = signal<CaseOutcome | null>(null);
   caseDetails = signal<SupportCase | null>(null);
-  loading = signal(true);
+  loading = signal(false);
   error = signal<string | null>(null);
   caseId = signal('');
+  pipelineStarted = signal(false);
 
-  isRunning = computed(() => this.loading() && this.outcome() === null);
+  isRunning = computed(
+    () => this.pipelineStarted() && this.loading() && this.outcome() === null,
+  );
   isComplete = computed(() => this.outcome() !== null);
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id') ?? '';
     this.caseId.set(id);
     this.fetchCaseDetails(id);
-    this.startPipeline(id);
+    this.loadPreviousOutcome(id);
   }
 
   private fetchCaseDetails(caseId: string): void {
@@ -67,23 +71,39 @@ export class CaseDetailComponent implements OnInit {
       .subscribe({
         next: (c) => this.caseDetails.set(c),
         error: () => {
-          // non-critical — header just won't show metadata
+          // non-critical
         },
       });
   }
 
-  private startPipeline(caseId: string): void {
-    this.loading.set(true);
+  private loadPreviousOutcome(caseId: string): void {
+    this.caseService
+      .getOutcome(caseId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (result) => this.previousOutcome.set(result),
+        error: () => {
+          // 404 = never run yet — expected
+        },
+      });
+  }
+
+  runPipeline(): void {
+    this.pipelineStarted.set(true);
+    this.previousOutcome.set(null);
+    this.agentEvents.set([]);
+    this.outcome.set(null);
     this.error.set(null);
+    this.loading.set(true);
 
     this.eventSourceService
-      .runCase(caseId)
+      .runCase(this.caseId())
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (event) => {
           this.agentEvents.update((prev) => [...prev, event]);
           if (event.event === 'complete') {
-            this.fetchOutcome(caseId);
+            this.fetchOutcome(this.caseId());
           }
           if (event.event === 'error') {
             this.loading.set(false);
