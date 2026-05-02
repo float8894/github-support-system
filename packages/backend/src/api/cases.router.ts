@@ -92,7 +92,14 @@ async function runPipeline(
         `Retrieved ${context.ragChunks.length} document chunks`,
         {
           agentName: 'OrchestratorAgent',
-          data: { count: context.ragChunks.length },
+          data: {
+            count: context.ragChunks.length,
+            chunks: context.ragChunks.map((c) => ({
+              section: c.section_heading,
+              source: c.source_url,
+              score: Math.round(c.score * 1000) / 1000,
+            })),
+          },
         },
       ),
     );
@@ -203,6 +210,21 @@ casesRouter.post('/cases', async (req: Request, res: Response) => {
 });
 
 // GET /api/cases/:id — return stored CaseOutcome
+// GET /api/cases/:id/case — return raw SupportCase row
+casesRouter.get('/cases/:id/case', async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const row = await queryOne<SupportCase>(
+    `SELECT case_id, customer_id, org_id, title, description, severity, status, issue_category
+     FROM support_cases WHERE case_id = $1`,
+    [id],
+  );
+  if (!row) {
+    res.status(404).json({ error: 'Case not found', code: 'NOT_FOUND' });
+    return;
+  }
+  res.json(row);
+});
+
 casesRouter.get('/cases/:id', async (req: Request, res: Response) => {
   const { id } = req.params;
   const raw = await redis.get(`outcome:${id}`);

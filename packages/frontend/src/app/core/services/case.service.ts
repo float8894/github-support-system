@@ -19,6 +19,10 @@ export class CaseService {
     return this.http.get<CaseOutcome>(`/api/cases/${caseId}`);
   }
 
+  getCase(caseId: string): Observable<SupportCase> {
+    return this.http.get<SupportCase>(`/api/cases/${caseId}/case`);
+  }
+
   listCases(): Observable<SupportCase[]> {
     return this.http.get<SupportCase[]>('/api/cases');
   }
