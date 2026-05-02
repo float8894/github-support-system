@@ -139,12 +139,17 @@ export interface SupportCase {
 }
 
 export interface CaseHistoryEvent {
-  event_id: string;
+  event_id: string | null;
   case_id: string;
-  event_type: string;
-  actor: string;
-  timestamp: string;
-  notes: string;
+  event_type: string | null;
+  actor: string | null;
+  timestamp: string | null;
+  notes: string | null;
+  /** Fields from the JOIN with support_cases (populated by get_case_history) */
+  issue_category: IssueCategory | null;
+  status: string | null;
+  title: string | null;
+  case_created_at: string | null;
 }
 
 export interface ServiceStatus {

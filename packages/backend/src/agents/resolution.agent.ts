@@ -42,13 +42,20 @@ function checkAutoEscalation(context: CaseContext): CaseVerdict | null {
     return 'clarify';
   }
 
-  // 2. Repeated unresolved history (≥3 same category, none resolved)
-  const openEvents = context.caseHistory.filter(
-    (e) => e.event_type === 'case_opened' || e.event_type === 'escalated',
-  );
-  if (openEvents.length >= 3) {
+  // 2. Repeated unresolved history (≥3 prior cases with same category, none resolved)
+  const priorUnresolved = new Set<string>();
+  for (const e of context.caseHistory) {
+    if (
+      e.case_id !== context.caseInput.case_id &&
+      e.issue_category === context.issueCategory &&
+      e.status !== 'resolved'
+    ) {
+      priorUnresolved.add(e.case_id);
+    }
+  }
+  if (priorUnresolved.size >= 3) {
     log.info(
-      { eventCount: openEvents.length },
+      { priorCount: priorUnresolved.size },
       'Auto-override: repeat unresolved history ≥3 → escalate',
     );
     return 'escalate';
