@@ -18,7 +18,7 @@ const seededCases: SupportCase[] = [
     case_id: 'seed-case-1',
     customer_id: 'cust-uuid-1',
     org_id: 'org-uuid-1',
-    title: 'Feature Entitlement Dispute',
+    title: 'GitHub Actions minutes not available',
     description: 'Actions not available',
     severity: 'high',
     status: 'open',
@@ -27,7 +27,7 @@ const seededCases: SupportCase[] = [
     case_id: 'seed-case-2',
     customer_id: 'cust-uuid-1',
     org_id: 'org-uuid-2',
-    title: 'Paid Features Locked',
+    title: 'All premium features suddenly locked',
     description: 'Enterprise features gone',
     severity: 'critical',
     status: 'open',
@@ -111,8 +111,15 @@ describe('ScenarioRunnerComponent', () => {
     });
     fixture.detectChanges();
     const component = fixture.componentInstance;
-    // S1 title matches seededCases[0].title
-    const matched = component.getCaseForScenario('Feature Entitlement Dispute');
+    // S1 keyword matches seededCases[0].title
+    const matched = component.getCaseForScenario({
+      id: 1,
+      title: 'Feature Entitlement Dispute',
+      description: '',
+      expectedVerdict: 'resolve / escalate',
+      primaryAgent: 'EntitlementsAgent',
+      seedKeyword: 'GitHub Actions minutes',
+    });
     expect(matched?.case_id).toBe('seed-case-1');
   });
 

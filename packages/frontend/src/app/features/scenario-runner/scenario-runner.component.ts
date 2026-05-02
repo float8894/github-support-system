@@ -21,6 +21,8 @@ interface ScenarioCard {
   description: string;
   expectedVerdict: string;
   primaryAgent: string;
+  /** Unique substring of the seeded case title in the DB */
+  seedKeyword: string;
 }
 
 const SCENARIOS: ScenarioCard[] = [
@@ -30,6 +32,7 @@ const SCENARIOS: ScenarioCard[] = [
     description: 'GitHub Actions minutes not available on Team plan.',
     expectedVerdict: 'resolve / escalate',
     primaryAgent: 'EntitlementsAgent',
+    seedKeyword: 'GitHub Actions minutes',
   },
   {
     id: 2,
@@ -37,6 +40,7 @@ const SCENARIOS: ScenarioCard[] = [
     description: 'All premium Enterprise features suddenly unavailable.',
     expectedVerdict: 'resolve',
     primaryAgent: 'BillingPlanAgent',
+    seedKeyword: 'All premium features',
   },
   {
     id: 3,
@@ -44,6 +48,7 @@ const SCENARIOS: ScenarioCard[] = [
     description: 'Personal Access Token returns 403 for organization repos.',
     expectedVerdict: 'resolve',
     primaryAgent: 'AuthTokenAgent',
+    seedKeyword: 'Personal Access Token returns',
   },
   {
     id: 4,
@@ -51,6 +56,7 @@ const SCENARIOS: ScenarioCard[] = [
     description: 'Rate-limit errors even when well under the hourly cap.',
     expectedVerdict: 'resolve',
     primaryAgent: 'ApiRateLimitAgent',
+    seedKeyword: 'Getting rate limited',
   },
   {
     id: 5,
@@ -58,13 +64,15 @@ const SCENARIOS: ScenarioCard[] = [
     description: 'Users cannot log in via SAML SSO; Okta shows success.',
     expectedVerdict: 'resolve / escalate',
     primaryAgent: 'AuthTokenAgent',
+    seedKeyword: 'SAML SSO authentication',
   },
   {
     id: 6,
     title: 'Repeated Unresolved Auth Issues',
     description: 'Fourth auth failure in two weeks — none previously resolved.',
-    expectedVerdict: 'escalate (auto, ≥3 history)',
+    expectedVerdict: 'escalate',
     primaryAgent: 'AuthTokenAgent',
+    seedKeyword: 'Yet another token authentication',
   },
   {
     id: 7,
@@ -72,6 +80,7 @@ const SCENARIOS: ScenarioCard[] = [
     description: '"GitHub is not working for us. Please fix."',
     expectedVerdict: 'clarify',
     primaryAgent: 'OrchestratorAgent',
+    seedKeyword: 'GitHub not working',
   },
   {
     id: 8,
@@ -80,6 +89,7 @@ const SCENARIOS: ScenarioCard[] = [
       'Cannot access Advanced Security after confirmed Enterprise upgrade.',
     expectedVerdict: 'resolve / escalate',
     primaryAgent: 'BillingPlanAgent',
+    seedKeyword: 'Cannot access Advanced Security',
   },
 ];
 
@@ -123,14 +133,35 @@ export class ScenarioRunnerComponent implements OnInit {
     });
   }
 
-  getCaseForScenario(scenarioTitle: string): SupportCase | undefined {
+  getCaseForScenario(scenario: ScenarioCard): SupportCase | undefined {
     return this.seededCases().find((c) =>
-      c.title.toLowerCase().includes(scenarioTitle.toLowerCase().slice(0, 20)),
+      c.title.toLowerCase().includes(scenario.seedKeyword.toLowerCase()),
     );
   }
 
+  getActualVerdict(scenario: ScenarioCard): string | null {
+    const c = this.getCaseForScenario(scenario);
+    if (!c) return null;
+    switch (c.status) {
+      case 'resolved':
+        return 'resolve';
+      case 'escalated':
+        return 'escalate';
+      case 'pending_clarification':
+        return 'clarify';
+      default:
+        return null;
+    }
+  }
+
+  verdictMatches(scenario: ScenarioCard): boolean | null {
+    const actual = this.getActualVerdict(scenario);
+    if (actual === null) return null;
+    return scenario.expectedVerdict.includes(actual);
+  }
+
   runScenario(scenario: ScenarioCard): void {
-    const existingCase = this.getCaseForScenario(scenario.title);
+    const existingCase = this.getCaseForScenario(scenario);
     if (existingCase) {
       void this.router.navigate(['/cases', existingCase.case_id]);
       return;

@@ -150,10 +150,17 @@
   margin-top: 4px;
 }
 
-.verdict-label {
+.verdict-labels {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 6px;
+}
+
+.verdict-label {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
 }
 
 .verdict-key {
@@ -162,6 +169,7 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
   color: var(--text-muted);
+  min-width: 42px;
 }
 
 .verdict-val {
@@ -180,6 +188,20 @@
   }
   &--mixed {
     color: var(--accent-purple);
+  }
+}
+
+.verdict-match {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+  line-height: 14px;
+
+  &--ok {
+    color: var(--accent-green);
+  }
+  &--fail {
+    color: var(--accent-red);
   }
 }
 
