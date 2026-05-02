@@ -240,3 +240,72 @@ The system follows fail-fast semantics for configuration errors (Zod validates a
 env vars at startup) and graceful degradation for runtime errors (a failing
 specialist agent records an error finding, and the ResolutionAgent can still
 produce a `clarify` outcome from the available evidence).
+
+---
+
+## 10. Limitations and Next Improvements
+
+### Current Limitations
+
+**Synthetic data only.** All business entities (customers, orgs, tokens, invoices,
+entitlements) are seeded test data. The system has no connection to real GitHub
+API endpoints, billing systems, or identity providers. All case outcomes are
+therefore based on fabricated account state.
+
+**Corpus staleness.** The RAG corpus is a one-time snapshot of GitHub Docs pages
+fetched at ingestion time. GitHub documentation changes frequently; the system
+has no mechanism to detect or re-ingest updated content automatically.
+
+**Single-pass routing.** The OrchestratorAgent classifies a case into one
+`IssueCategory` in a single LLM call with no retry or confidence threshold.
+Ambiguous cases that span multiple categories (e.g. billing _and_ SAML) may be
+routed to only one specialist agent, missing evidence from the other domain.
+
+**No SSE reconnect.** If the browser disconnects mid-stream (network drop,
+page refresh), the SSE connection is lost. The pipeline continues server-side
+and the final outcome is stored in Redis, but the user must navigate back and
+refresh to see it — there is no automatic reconnection or partial replay from
+the last received event.
+
+**No API authentication.** All Express routes are unauthenticated. Any client
+with network access can read case outcomes, trigger pipelines, or ingest
+documents. This is acceptable for an internal demo but is not production-ready.
+
+**Sequential specialist agents.** Specialist agents run in series within the
+pipeline. For cases routed to multiple agents, the second agent does not
+benefit from the first agent's findings at reasoning time — findings are only
+combined by the ResolutionAgent at the end.
+
+---
+
+### Next Improvements
+
+**Live GitHub API enrichment.** Replace seeded entity data with real-time calls
+to the GitHub REST API (organisation memberships, billing status, token scopes)
+using a service account token. This would allow the system to handle real
+customer cases without manual data entry.
+
+**Corpus refresh pipeline.** Add a scheduled job (cron or GitHub Actions
+workflow) that re-fetches the GitHub Docs corpus, re-embeds changed pages, and
+upserts updated chunks. Include a `fetched_at` column on `document_chunks` so
+stale chunks can be identified and re-processed.
+
+**Parallel specialist agents.** When the orchestrator routes to multiple agents,
+run them concurrently using `Promise.all`. For billing + entitlement cases this
+would cut pipeline latency roughly in half, since each agent's MCP tool calls
+are independent.
+
+**Agent unit test harness.** Add Vitest fixtures that mock the MCP client and
+RAG retrieval layer, allowing each specialist agent to be tested against
+predefined entity states without a live database or Anthropic API call.
+Currently only the Angular frontend components have unit tests.
+
+**Human-in-the-loop feedback loop.** Add a `POST /api/cases/:id/feedback`
+endpoint that records whether a support agent accepted, modified, or rejected
+the AI outcome. Feed accepted outcomes back as few-shot examples in agent
+prompts to improve resolution quality over time.
+
+**Role-based API access.** Add JWT or session-based authentication to the
+Express API, distinguishing read-only support agents from admins who can
+trigger ingestion or view internal notes. The Angular frontend already has
+routing infrastructure that could enforce this.
