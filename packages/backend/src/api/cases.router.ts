@@ -302,10 +302,26 @@ casesRouter.get('/cases/:id/stream', async (req: Request, res: Response) => {
   res.end();
 });
 
+// DELETE /api/cases/:id — delete a support case and its cached outcome
+casesRouter.delete('/cases/:id', async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const result = await query(`DELETE FROM support_cases WHERE case_id = $1`, [
+    id,
+  ]);
+  if ((result as unknown as { rowCount: number }).rowCount === 0) {
+    res.status(404).json({ error: 'Case not found', code: 'NOT_FOUND' });
+    return;
+  }
+  await redis.del(`outcome:${id}`);
+  await redis.del(`events:${id}`);
+  log.info({ case_id: id }, 'Support case deleted');
+  res.status(204).end();
+});
+
 // GET /api/cases — list support cases (newest first, limit 50)
 casesRouter.get('/cases', async (_req: Request, res: Response) => {
   const rows = await query<SupportCase>(
-    `SELECT case_id, customer_id, org_id, title, description, severity, status, issue_category
+    `SELECT case_id, customer_id, org_id, title, description, severity, status, issue_category, created_at
      FROM support_cases
      ORDER BY created_at DESC
      LIMIT 50`,
