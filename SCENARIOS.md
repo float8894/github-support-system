@@ -18,7 +18,7 @@ Run: `npm run scenarios:capture -w packages/backend` → `scenarios-output.json`
 | S5  | [SAML SSO authentication fails with error](#s5-saml-sso-authentication-fails-with-error)               | AuthTokenAgent    | `escalate`                    |
 | S6  | [Yet another token authentication failure](#s6-yet-another-token-authentication-failure)               | AuthTokenAgent    | `escalate` (auto, ≥3 history) |
 | S7  | [GitHub not working](#s7-github-not-working)                                                           | OrchestratorAgent | `clarify`                     |
-| S8  | [Cannot access Advanced Security features](#s8-cannot-access-advanced-security-features)               | EntitlementsAgent | `escalate`                    |
+| S8  | [Billing issue blocking CI/CD and API automation](#s8-billing-issue-blocking-cicd-and-api-automation)  | BillingPlanAgent  | `resolve`                     |
 
 ---
 
@@ -827,131 +827,130 @@ The OrchestratorAgent correctly classified this as `ambiguous` — there is insu
 
 ---
 
-## S8: Cannot access Advanced Security features
+## S8: Billing issue blocking CI/CD and API automation
 
 ### Input
 
-| Field         | Value                                                                                                                                                                                  |
-| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `case_id`     | `88a6e2b3-4252-4bd2-92ab-d6335c03734b`                                                                                                                                                 |
-| `customer`    | Acme Corp (premium support)                                                                                                                                                            |
-| `org`         | acme-engineering — currently shows Team plan; customer claims Enterprise upgrade 3 days ago                                                                                            |
-| `severity`    | `high`                                                                                                                                                                                 |
-| `description` | "We upgraded to Enterprise 3 days ago and paid for GitHub Advanced Security. We cannot access secret scanning or code scanning features. Our billing shows the payment was processed." |
+| Field         | Value                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `case_id`     | `c2452535-d742-4517-9032-afd6710ae650`                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `customer`    | Acme Corp (premium support)                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `org`         | acme-data — Enterprise plan, **billing: past_due**                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `severity`    | `critical`                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `description` | "We have an outstanding invoice from March that we are actively working to resolve with our finance team. In the meantime all our GitHub Actions workflows and REST API-based automation have stopped working with 403 Forbidden errors. Our CI/CD pipelines are fully blocked and production deployments are failing. We need to understand whether the billing issue is directly causing the API access failures and what we need to do immediately to restore automation access." |
 
 ### Pipeline Trace
 
 ```
 OrchestratorAgent
-  ├── get_org_context      → org: acme-engineering, current_plan: Team (not yet updated in system)
-  ├── get_case_history     → 10 events incl. multiple entitlement/billing issues
-  ├── RAG retrieve (top-5) → Advanced Security features, GitHub plans docs
-  └── classify: entitlement → route: [EntitlementsAgent]
+  ├── get_org_context      → org: acme-data, plan: Enterprise, billing_status: past_due
+  ├── get_case_history     → 6 prior related cases (Actions, billing, PAT, SAML issues)
+  ├── RAG retrieve (top-5) → GitHub Actions billing docs, billing troubleshooting
+  └── classify: billing_plan → route: [BillingPlanAgent]
 
-EntitlementsAgent
-  ├── LLM: extract feature name → "advanced_security"
-  ├── check_entitlement(enterprise, advanced_security) → enabled: false, source: not_found
-  ├── check_subscription(enterprise) → plan data (Team plan shown)
-  └── verdict: escalate  (not_found is unconditional escalation)
+BillingPlanAgent
+  ├── check_subscription(org, acme-data)        → active_status: false
+  ├── check_subscription(enterprise, acme-ent)  → active_status: false
+  ├── check_invoice_status(customer)            → $21,000 overdue since 2026-03-31
+  └── verdict: resolve  (billing root cause identified, clear remediation path)
 
 ResolutionAgent
-  ├── Auto-override: entitlement source=not_found → escalate (unconditional)
-  ├── create_escalation → escalation_id: affaeacb-ae1a-4342-bb07-6aa2c5546b2f, severity: high
-  └── verdict: escalate
+  ├── No auto-override triggered
+  └── verdict: resolve
 ```
 
 ### MCP Tools Called
 
-| Tool                 | Key Output                                                                  |
-| -------------------- | --------------------------------------------------------------------------- |
-| `get_org_context`    | acme-engineering, `current_plan: "Team"`, billing active, enterprise linked |
-| `get_case_history`   | 10 events; concurrent billing and entitlement issues                        |
-| `check_entitlement`  | `enabled: false, source: "not_found"`, no entitlement_id                    |
-| `check_subscription` | Returns null for enterprise-level check                                     |
+| Tool                   | Key Output                                                           |
+| ---------------------- | -------------------------------------------------------------------- |
+| `get_org_context`      | acme-data, Enterprise plan, `billing_status: "past_due"`             |
+| `get_case_history`     | 6 related events — Actions, billing, PAT 403, SAML auth failures     |
+| `check_subscription`   | org-level: `active_status: false`                                    |
+| `check_subscription`   | enterprise-level: `active_status: false`                             |
+| `check_invoice_status` | invoice `$21,000 USD`, `payment_status: "overdue"`, due `2026-03-31` |
 
 ### RAG Citations (5)
 
-| Source                                                                    | Section                             | Score |
-| ------------------------------------------------------------------------- | ----------------------------------- | ----- |
-| docs.github.com/en/code-security/getting-started/github-security-features | Available for all GitHub plans      | 0.48  |
-| docs.github.com/en/code-security/getting-started/github-security-features | Available with GitHub Code Security | 0.45  |
-| docs.github.com/en/code-security/getting-started/github-security-features | About GitHub's security features    | 0.44  |
-| docs.github.com/en/get-started/learning-about-github/githubs-plans        | GitHub Enterprise                   | 0.43  |
-| docs.github.com/en/get-started/learning-about-github/githubs-plans        | GitHub Enterprise                   | 0.43  |
+| Source                                                                                          | Section                                | Score |
+| ----------------------------------------------------------------------------------------------- | -------------------------------------- | ----- |
+| docs.github.com/en/actions/administering-github-actions/usage-limits-billing-and-administration | In this article                        | 0.53  |
+| docs.github.com/en/actions/administering-github-actions/usage-limits-billing-and-administration | Billing and usage                      | 0.51  |
+| docs.github.com/en/rest/authentication/authenticating-to-the-rest-api                           | Failed login limit                     | 0.47  |
+| docs.github.com/en/actions/administering-github-actions/usage-limits-billing-and-administration | About billing for GitHub Actions       | 0.46  |
+| docs.github.com/en/billing/how-tos/troubleshooting                                              | Troubleshooting a declined credit card | 0.46  |
 
 ### Outcome
 
 ```json
 {
-  "verdict": "escalate",
-  "issue_type": "entitlement",
-  "escalation_id": "affaeacb-ae1a-4342-bb07-6aa2c5546b2f"
+  "verdict": "resolve",
+  "issue_type": "billing_plan"
 }
 ```
 
 **Key findings:**
 
-- System still shows org on Team plan despite claimed Enterprise upgrade 3 days ago
-- `advanced_security` entitlement record is completely missing (`source: not_found`)
-- Billing system processed payment but entitlements service was not synchronized
-- This is a provisioning pipeline failure requiring backend intervention
+- Enterprise subscription on `acme-data` is `active_status: false`
+- Invoice for $21,000 USD from March 2026 is overdue (due 2026-03-31)
+- Billing delinquency is the direct, confirmed root cause of all 403 errors
+- 6 related prior cases all show symptoms consistent with subscription deactivation
+- Customer's finance team is already working on payment — a clear resolution path exists
 
 ### Customer Response
 
-> Thank you for contacting GitHub Support regarding your Advanced Security access issues.
+> I can confirm that the 403 Forbidden errors blocking your GitHub Actions workflows and REST API automation are directly related to your billing status. Your Enterprise subscription is currently inactive due to an overdue invoice from March 2026 ($21,000 USD, due March 31st).
 >
-> I can see that you upgraded to the Enterprise plan 3 days ago, but our system records show a discrepancy that requires immediate attention from our billing and entitlements team. The Advanced Security features you're trying to access are not properly provisioned in our system following your plan upgrade.
+> **Immediate Action Steps:**
+>
+> 1. **Contact GitHub Sales/Billing immediately** to discuss payment arrangements or temporary access restoration while your finance team resolves the outstanding invoice
+> 2. **Prioritize payment of the March invoice** to restore full service access
+> 3. **Document all affected workflows and automation** for rapid restoration once billing is resolved
+>
+> **What's Happening:**
+> When Enterprise subscriptions become inactive due to overdue payments, GitHub restricts access to premium features including Actions workflows and API automation to prevent further usage charges.
 >
 > **Next Steps:**
 >
-> 1. I'm escalating this case to our Enterprise Billing team who will investigate the provisioning delay
-> 2. They will verify your payment and ensure proper entitlement activation
-> 3. You should expect an update within 24 hours with resolution timeline
+> - Our billing team can work with you on payment arrangements and may be able to provide temporary access restoration while you resolve the invoice
+> - Once payment is processed, all services should restore automatically within 1–2 hours
 >
-> **What to expect:**
-> Once resolved, you'll have access to all Advanced Security features including secret scanning for private repositories, dependency review, code scanning with CodeQL, and advanced Dependabot features.
->
-> I apologize for this delay in accessing your purchased features. This appears to be a backend provisioning issue rather than anything on your end, and our specialists will resolve it promptly.
->
-> **Reference:** Case #88a6e2b3-4252-4bd2-92ab-d6335c03734b
+> Given the critical impact on your production deployments, our billing specialists will reach out within 2 hours to discuss immediate options.
 
 ### Internal Note
 
 > **Root Cause Analysis:**
 >
-> - Customer claims Enterprise upgrade 3 days ago with confirmed payment
-> - System records show org still on 'Team' plan
-> - EntitlementsAgent confirmed `advanced_security` entitlement completely missing (`source: "not_found"`)
-> - This indicates billing system processed upgrade but entitlements service was not synchronized
+> - Org `acme-data` has Enterprise subscription with `active_status: false`
+> - Invoice $21,000 USD from March 2026 shows `payment_status: overdue`, due 2026-03-31
+> - `billing_status: "past_due"` visible in org context
 >
-> **Evidence:**
+> **Evidence of Systemic Impact:**
 >
-> - Org context: Plan shows "Team" despite claimed Enterprise upgrade
-> - Entitlement check: Returns `not_found` rather than disabled
-> - Customer has premium support tier and enterprise_id exists
+> - Case history shows 6 recent related cases: Actions minutes unavailable, premium features locked, PAT 403 errors, SAML issues, token authentication failures — all consistent with subscription deactivation
 >
-> **Recommended Actions for Billing Team:**
+> **Resolution Path:**
 >
-> 1. Verify payment processing for Enterprise upgrade 3 days ago
-> 2. Check billing-to-entitlements sync processes for this org
-> 3. Manually provision Advanced Security entitlements if payment confirmed
-> 4. Investigate if this affects other recent Enterprise upgrades (S1 also shows missing entitlements for same enterprise)
+> - Requires billing team to arrange payment or grant temporary restoration
+> - Customer's finance team is already engaged — payment likely imminent
+> - Once invoice is paid, subscription reactivates automatically; all API/Actions access restores within 1–2 hours
+>
+> **Priority:** Critical — production deployments blocked; billing team must contact within 2 hours.
 
 ### Verdict Rationale
 
-S8 is deliberately designed to test the entitlement `not_found` escalation path for a different feature (Advanced Security vs. Actions in S1). The combination of a claimed billing event that hasn't propagated to the entitlements service and a fully absent record (not just `enabled: false`) requires manual backend reconciliation. The auto-escalation rule fires unconditionally, ensuring customers who have paid are never left without a path to resolution.
+S8 demonstrates the combined billing-and-technical scenario from the brief: a known outstanding invoice is the confirmed root cause of API 403 failures, not a token issue or a rate limit. `BillingPlanAgent` identifies `active_status: false` on both org and enterprise subscriptions, cross-references the overdue invoice, and returns `resolve` because the remediation path is unambiguous — pay the invoice, subscription reactivates, automation resumes. This is deliberately distinct from S2 ("features suddenly locked, no idea why") in that here the customer already suspects billing and just needs confirmation plus a path forward.
 
 ---
 
 ## Appendix: Scenario Summary Table
 
-| #   | Title                                | Severity | Agent(s)                  | Issue Type     | Verdict  | Escalation ID |
-| --- | ------------------------------------ | -------- | ------------------------- | -------------- | -------- | ------------- |
-| S1  | GitHub Actions minutes not available | high     | Entitlements → Resolution | entitlement    | escalate | 78205622      |
-| S2  | All premium features suddenly locked | critical | BillingPlan → Resolution  | billing_plan   | resolve  | —             |
-| S3  | PAT returns 403 for org repos        | medium   | AuthToken → Resolution    | auth_token     | resolve  | —             |
-| S4  | Getting rate limited on REST API     | high     | ApiRateLimit → Resolution | api_rate_limit | resolve  | —             |
-| S5  | SAML SSO authentication fails        | critical | AuthToken → Resolution    | saml_sso       | escalate | 18e6a5d7      |
-| S6  | Repeated token auth failure          | critical | AuthToken → Resolution    | auth_token     | escalate | 4c87f5bc      |
-| S7  | GitHub not working (vague)           | medium   | Orchestrator → Resolution | ambiguous      | clarify  | —             |
-| S8  | Advanced Security not provisioned    | high     | Entitlements → Resolution | entitlement    | escalate | affaeacb      |
+| #   | Title                                           | Severity | Agent(s)                  | Issue Type     | Verdict  | Escalation ID |
+| --- | ----------------------------------------------- | -------- | ------------------------- | -------------- | -------- | ------------- |
+| S1  | GitHub Actions minutes not available            | high     | Entitlements → Resolution | entitlement    | escalate | 78205622      |
+| S2  | All premium features suddenly locked            | critical | BillingPlan → Resolution  | billing_plan   | resolve  | —             |
+| S3  | PAT returns 403 for org repos                   | medium   | AuthToken → Resolution    | auth_token     | resolve  | —             |
+| S4  | Getting rate limited on REST API                | high     | ApiRateLimit → Resolution | api_rate_limit | resolve  | —             |
+| S5  | SAML SSO authentication fails                   | critical | AuthToken → Resolution    | saml_sso       | escalate | 18e6a5d7      |
+| S6  | Repeated token auth failure                     | critical | AuthToken → Resolution    | auth_token     | escalate | 4c87f5bc      |
+| S7  | GitHub not working (vague)                      | medium   | Orchestrator → Resolution | ambiguous      | clarify  | —             |
+| S8  | Billing issue blocking CI/CD and API automation | critical | BillingPlan → Resolution  | billing_plan   | resolve  | —             |

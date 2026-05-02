@@ -341,16 +341,16 @@ Navigate to [http://localhost:4200/scenarios](http://localhost:4200/scenarios) a
 
 ## 🧪 Scenario Results
 
-| #   | Title                                | Primary Agent     | Actual Verdict       |
-| --- | ------------------------------------ | ----------------- | -------------------- |
-| S1  | GitHub Actions minutes not available | EntitlementsAgent | `escalate`           |
-| S2  | All premium features suddenly locked | BillingPlanAgent  | `resolve`            |
-| S3  | PAT returns 403 for org repos        | AuthTokenAgent    | `resolve`            |
-| S4  | Getting rate limited on REST API     | ApiRateLimitAgent | `resolve`            |
-| S5  | SAML SSO authentication fails        | AuthTokenAgent    | `escalate`           |
-| S6  | Repeated token auth failure (×4)     | AuthTokenAgent    | `escalate` (auto ≥3) |
-| S7  | GitHub not working (vague)           | OrchestratorAgent | `clarify`            |
-| S8  | Advanced Security not provisioned    | EntitlementsAgent | `escalate`           |
+| #   | Title                                           | Primary Agent     | Actual Verdict       |
+| --- | ----------------------------------------------- | ----------------- | -------------------- |
+| S1  | GitHub Actions minutes not available            | EntitlementsAgent | `escalate`           |
+| S2  | All premium features suddenly locked            | BillingPlanAgent  | `resolve`            |
+| S3  | PAT returns 403 for org repos                   | AuthTokenAgent    | `resolve`            |
+| S4  | Getting rate limited on REST API                | ApiRateLimitAgent | `resolve`            |
+| S5  | SAML SSO authentication fails                   | AuthTokenAgent    | `escalate`           |
+| S6  | Repeated token auth failure (×4)                | AuthTokenAgent    | `escalate` (auto ≥3) |
+| S7  | GitHub not working (vague)                      | OrchestratorAgent | `clarify`            |
+| S8  | Billing issue blocking CI/CD and API automation | BillingPlanAgent  | `resolve`            |
 
 See [SCENARIOS.md](./SCENARIOS.md) for full pipeline traces, MCP tool calls, RAG citations, customer responses, and internal notes for every scenario.
 

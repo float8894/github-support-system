@@ -22,7 +22,7 @@ async function seed() {
     await query(
       `INSERT INTO customers (customer_id, customer_name, region, support_tier, status)
        VALUES ($1, $2, $3, $4, $5)`,
-      [acmeCustomerId, 'Acme Corp', 'us-east-1', 'premium', 'active']
+      [acmeCustomerId, 'Acme Corp', 'us-east-1', 'premium', 'active'],
     );
 
     // Enterprise Account for Acme
@@ -30,7 +30,7 @@ async function seed() {
     await query(
       `INSERT INTO enterprise_accounts (enterprise_id, enterprise_name, support_tier, saml_enabled, account_status)
        VALUES ($1, $2, $3, $4, $5)`,
-      [acmeEnterpriseId, 'Acme Enterprise', 'enterprise', true, 'active']
+      [acmeEnterpriseId, 'Acme Enterprise', 'enterprise', true, 'active'],
     );
 
     // GitHub Org 1: acme-engineering
@@ -38,7 +38,15 @@ async function seed() {
     await query(
       `INSERT INTO github_orgs (org_id, org_name, customer_id, enterprise_id, current_plan, billing_status, sso_enabled)
        VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-      [acmeEngOrgId, 'acme-engineering', acmeCustomerId, acmeEnterpriseId, 'Team', 'active', true]
+      [
+        acmeEngOrgId,
+        'acme-engineering',
+        acmeCustomerId,
+        acmeEnterpriseId,
+        'Team',
+        'active',
+        true,
+      ],
     );
 
     // GitHub Org 2: acme-data (for billing scenario)
@@ -46,7 +54,15 @@ async function seed() {
     await query(
       `INSERT INTO github_orgs (org_id, org_name, customer_id, enterprise_id, current_plan, billing_status, sso_enabled)
        VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-      [acmeDataOrgId, 'acme-data', acmeCustomerId, acmeEnterpriseId, 'Enterprise', 'past_due', false]
+      [
+        acmeDataOrgId,
+        'acme-data',
+        acmeCustomerId,
+        acmeEnterpriseId,
+        'Enterprise',
+        'past_due',
+        false,
+      ],
     );
 
     // Customer 2: TechStart Inc
@@ -54,7 +70,7 @@ async function seed() {
     await query(
       `INSERT INTO customers (customer_id, customer_name, region, support_tier, status)
        VALUES ($1, $2, $3, $4, $5)`,
-      [techStartCustomerId, 'TechStart Inc', 'eu-west-1', 'basic', 'active']
+      [techStartCustomerId, 'TechStart Inc', 'eu-west-1', 'basic', 'active'],
     );
 
     // GitHub Org 3: techstart-dev (for API rate limit scenario)
@@ -62,7 +78,15 @@ async function seed() {
     await query(
       `INSERT INTO github_orgs (org_id, org_name, customer_id, enterprise_id, current_plan, billing_status, sso_enabled)
        VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-      [techStartOrgId, 'techstart-dev', techStartCustomerId, null, 'Free', 'active', false]
+      [
+        techStartOrgId,
+        'techstart-dev',
+        techStartCustomerId,
+        null,
+        'Free',
+        'active',
+        false,
+      ],
     );
 
     logger.info('Created customers and orgs');
@@ -75,14 +99,29 @@ async function seed() {
     await query(
       `INSERT INTO subscriptions (subscription_id, scope_type, scope_id, plan_name, billing_cycle, renewal_date, active_status)
        VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-      [s1SubscriptionId, 'org', acmeEngOrgId, 'Team', 'monthly', '2026-05-15', true]
+      [
+        s1SubscriptionId,
+        'org',
+        acmeEngOrgId,
+        'Team',
+        'monthly',
+        '2026-05-15',
+        true,
+      ],
     );
 
     const s1EntitlementId = randomUUID();
     await query(
       `INSERT INTO entitlements (entitlement_id, scope_type, scope_id, feature_name, enabled, source)
        VALUES ($1, $2, $3, $4, $5, $6)`,
-      [s1EntitlementId, 'org', acmeEngOrgId, 'github_actions_minutes', false, 'plan_limit']
+      [
+        s1EntitlementId,
+        'org',
+        acmeEngOrgId,
+        'github_actions_minutes',
+        false,
+        'plan_limit',
+      ],
     );
 
     const s1CaseId = randomUUID();
@@ -96,8 +135,8 @@ async function seed() {
         'GitHub Actions minutes not available',
         'Our team plan should include 3000 Actions minutes per month, but we are seeing "Feature not available" when trying to run workflows. This is blocking our CI/CD pipeline.',
         'high',
-        'open'
-      ]
+        'open',
+      ],
     );
 
     logger.info('Created Scenario 1: Feature Entitlement Dispute');
@@ -110,14 +149,30 @@ async function seed() {
     await query(
       `INSERT INTO subscriptions (subscription_id, scope_type, scope_id, plan_name, billing_cycle, renewal_date, active_status)
        VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-      [s2SubscriptionId, 'org', acmeDataOrgId, 'Enterprise', 'annual', '2026-06-01', false]
+      [
+        s2SubscriptionId,
+        'org',
+        acmeDataOrgId,
+        'Enterprise',
+        'annual',
+        '2026-06-01',
+        false,
+      ],
     );
 
     const s2InvoiceId = randomUUID();
     await query(
       `INSERT INTO invoices (invoice_id, customer_id, billing_period, amount, currency, payment_status, due_date)
        VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-      [s2InvoiceId, acmeCustomerId, '2026-03', 21000.00, 'USD', 'overdue', '2026-04-01']
+      [
+        s2InvoiceId,
+        acmeCustomerId,
+        '2026-03',
+        21000.0,
+        'USD',
+        'overdue',
+        '2026-04-01',
+      ],
     );
 
     const s2CaseId = randomUUID();
@@ -131,8 +186,8 @@ async function seed() {
         'All premium features suddenly locked',
         'All our paid Enterprise features (Advanced Security, Codespaces, Packages) are now showing as unavailable. We were using them yesterday without issues. This is affecting our entire team.',
         'critical',
-        'open'
-      ]
+        'open',
+      ],
     );
 
     logger.info('Created Scenario 2: Paid Features Locked Due to Billing');
@@ -153,8 +208,8 @@ async function seed() {
         JSON.stringify(['repo', 'read:org']),
         false,
         null,
-        false
-      ]
+        false,
+      ],
     );
 
     const s3CaseId = randomUUID();
@@ -168,8 +223,8 @@ async function seed() {
         'Personal Access Token returns 403 for org repos',
         'My PAT works fine for my personal repos, but returns "403 Forbidden" when I try to access our organization repositories. The token has "repo" and "read:org" scopes.',
         'medium',
-        'open'
-      ]
+        'open',
+      ],
     );
 
     logger.info('Created Scenario 3: PAT Failing for Org Resources');
@@ -182,7 +237,7 @@ async function seed() {
     await query(
       `INSERT INTO api_usage (usage_id, org_id_or_user_id, api_type, time_window, request_count, throttled_requests)
        VALUES ($1, $2, $3, $4, $5, $6)`,
-      [s4ApiUsageId, techStartOrgId, 'rest', '1h', 4823, 0]
+      [s4ApiUsageId, techStartOrgId, 'rest', '1h', 4823, 0],
     );
 
     const s4IncidentId = randomUUID();
@@ -195,15 +250,22 @@ async function seed() {
         'major',
         JSON.stringify(['REST API', 'GraphQL API']),
         new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-        'monitoring'
-      ]
+        'monitoring',
+      ],
     );
 
     const s4ServiceStatusId = randomUUID();
     await query(
       `INSERT INTO service_status (service_status_id, component, region, status, incident_id, updated_at)
        VALUES ($1, $2, $3, $4, $5, $6)`,
-      [s4ServiceStatusId, 'REST API', 'global', 'degraded', s4IncidentId, new Date().toISOString()]
+      [
+        s4ServiceStatusId,
+        'REST API',
+        'global',
+        'degraded',
+        s4IncidentId,
+        new Date().toISOString(),
+      ],
     );
 
     const s4CaseId = randomUUID();
@@ -217,8 +279,8 @@ async function seed() {
         'Getting rate limited on REST API',
         'We are getting "You have exceeded a secondary rate limit" errors from the GitHub REST API even though we are well under the 5000 requests/hour limit. Our monitoring shows only ~500 requests in the last hour.',
         'high',
-        'open'
-      ]
+        'open',
+      ],
     );
 
     logger.info('Created Scenario 4: REST API Rate Limit Complaint');
@@ -238,8 +300,8 @@ async function seed() {
         true,
         'Okta',
         new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(), // 90 days from now
-        new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString() // 1 day ago
-      ]
+        new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
+      ],
     );
 
     const s5CaseId = randomUUID();
@@ -253,8 +315,8 @@ async function seed() {
         'SAML SSO authentication fails with error',
         'Users are unable to log in via SAML SSO. They see "Authentication failed: Invalid SAML response" error. Our Okta logs show successful authentication on their end.',
         'critical',
-        'open'
-      ]
+        'open',
+      ],
     );
 
     logger.info('Created Scenario 5: SAML SSO Login Failure');
@@ -275,8 +337,8 @@ async function seed() {
         JSON.stringify(['repo']),
         false,
         new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(), // expired 10 days ago
-        false
-      ]
+        false,
+      ],
     );
 
     const s6Case1Id = randomUUID();
@@ -292,10 +354,34 @@ async function seed() {
          ($10, $11, $12, $13, $14, $15, $16, $17, $18),
          ($19, $20, $21, $22, $23, $24, $25, $26, $27)`,
       [
-        s6Case1Id, acmeCustomerId, acmeEngOrgId, 'Token auth issue', 'PAT not working', 'medium', 'open', 'auth_token', new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
-        s6Case2Id, acmeCustomerId, acmeEngOrgId, 'Authentication problem', 'Cannot authenticate', 'medium', 'open', 'auth_token', new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-        s6Case3Id, acmeCustomerId, acmeEngOrgId, 'Auth keeps failing', 'Same auth error', 'high', 'open', 'auth_token', new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
-      ]
+        s6Case1Id,
+        acmeCustomerId,
+        acmeEngOrgId,
+        'Token auth issue',
+        'PAT not working',
+        'medium',
+        'open',
+        'auth_token',
+        new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
+        s6Case2Id,
+        acmeCustomerId,
+        acmeEngOrgId,
+        'Authentication problem',
+        'Cannot authenticate',
+        'medium',
+        'open',
+        'auth_token',
+        new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
+        s6Case3Id,
+        acmeCustomerId,
+        acmeEngOrgId,
+        'Auth keeps failing',
+        'Same auth error',
+        'high',
+        'open',
+        'auth_token',
+        new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+      ],
     );
 
     // Current case
@@ -309,8 +395,8 @@ async function seed() {
         'Yet another token authentication failure',
         'This is the fourth time in two weeks we are experiencing token authentication failures. Previous cases remain unresolved. We need urgent help.',
         'critical',
-        'open'
-      ]
+        'open',
+      ],
     );
 
     // Add case history events
@@ -319,7 +405,13 @@ async function seed() {
       await query(
         `INSERT INTO case_history (event_id, case_id, event_type, actor, notes)
          VALUES ($1, $2, $3, $4, $5)`,
-        [eventId, caseId, 'created', 'system', 'Case created via support portal']
+        [
+          eventId,
+          caseId,
+          'created',
+          'system',
+          'Case created via support portal',
+        ],
       );
     }
 
@@ -340,47 +432,18 @@ async function seed() {
         'GitHub not working',
         'GitHub is not working for us. Please fix.',
         'medium',
-        'open'
-      ]
+        'open',
+      ],
     );
 
     logger.info('Created Scenario 7: Ambiguous Complaint');
 
     // ========================================================================
     // Scenario 8: Billing + Technical Issue (Multi-Agent)
+    // acme-data org already has active_status=false subscription and an
+    // overdue invoice from S2 seeding — reuse that billing state to show
+    // how a payment failure causes API automation failures downstream.
     // ========================================================================
-
-    const s8SubscriptionId = randomUUID();
-    await query(
-      `INSERT INTO subscriptions (subscription_id, scope_type, scope_id, plan_name, billing_cycle, renewal_date, active_status, pending_change)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-      [
-        s8SubscriptionId,
-        'org',
-        acmeEngOrgId,
-        'Team',
-        'monthly',
-        '2026-05-20',
-        true,
-        'upgrade_to_enterprise'
-      ]
-    );
-
-    const s8TokenId = randomUUID();
-    await query(
-      `INSERT INTO token_records (token_id, token_type, owner, org_id, permissions, sso_authorized, expiration_date, revoked)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-      [
-        s8TokenId,
-        'pat',
-        'charlie@acme.com',
-        acmeEngOrgId,
-        JSON.stringify(['repo', 'admin:org']),
-        true,
-        null,
-        false
-      ]
-    );
 
     const s8CaseId = randomUUID();
     await query(
@@ -389,12 +452,12 @@ async function seed() {
       [
         s8CaseId,
         acmeCustomerId,
-        acmeEngOrgId,
-        'Cannot access Advanced Security features',
-        'We upgraded to Enterprise plan 3 days ago and payment was confirmed, but we still cannot access Advanced Security features like secret scanning and dependency review. We get "Feature not available on your plan" errors.',
-        'high',
-        'open'
-      ]
+        acmeDataOrgId,
+        'Billing issue blocking CI/CD and API automation',
+        'We have an outstanding invoice from March that we are actively working to resolve with our finance team. In the meantime all our GitHub Actions workflows and REST API-based automation have stopped working with 403 Forbidden errors. Our CI/CD pipelines are fully blocked and production deployments are failing. We need to understand whether the billing issue is directly causing the API access failures and what we need to do immediately to restore automation access.',
+        'critical',
+        'open',
+      ],
     );
 
     logger.info('Created Scenario 8: Billing + Technical Issue');
@@ -409,8 +472,9 @@ async function seed() {
     logger.info('  - 1 enterprise account');
     logger.info('  - 3 GitHub orgs');
     logger.info('  - 8 support case scenarios');
-    logger.info('  - All supporting entities (subscriptions, invoices, tokens, etc.)');
-
+    logger.info(
+      '  - All supporting entities (subscriptions, invoices, tokens, etc.)',
+    );
   } catch (err) {
     logger.error({ err }, 'Seed script failed');
     throw err;
