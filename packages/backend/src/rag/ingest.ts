@@ -41,6 +41,27 @@ const SOURCE_URLS: string[] = [
   'https://docs.github.com/en/authentication/troubleshooting-ssh/error-permission-denied-publickey',
   'https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/about-authentication-with-a-github-app',
   'https://docs.github.com/en/rest/overview/resources-in-the-rest-api',
+  // ── Brief-specified seed URLs (added to ensure full corpus coverage) ──────
+  'https://docs.github.com/en/get-started/using-github-docs/about-versions-of-github-docs',
+  'https://docs.github.com/en/billing',
+  'https://docs.github.com/en/billing/get-started/how-billing-works',
+  'https://docs.github.com/en/billing/how-tos/manage-plan-and-licenses',
+  'https://docs.github.com/billing/managing-the-plan-for-your-github-account/upgrading-your-accounts-plan',
+  'https://docs.github.com/en/billing/how-tos/manage-plan-and-licenses/downgrade-plan',
+  'https://docs.github.com/en/billing/how-tos/troubleshooting',
+  'https://docs.github.com/en/rest',
+  'https://docs.github.com/en/rest/quickstart',
+  'https://docs.github.com/en/rest/using-the-rest-api/getting-started-with-the-rest-api',
+  'https://docs.github.com/en/rest/authentication/authenticating-to-the-rest-api',
+  'https://docs.github.com/authentication/authenticating-with-saml-single-sign-on',
+  'https://docs.github.com/github/authenticating-to-github/authenticating-with-saml-single-sign-on/authorizing-a-personal-access-token-for-use-with-saml-single-sign-on',
+  'https://docs.github.com/en/organizations/managing-programmatic-access-to-your-organization/setting-a-personal-access-token-policy-for-your-organization',
+  'https://docs.github.com/en/enterprise-cloud@latest/organizations/managing-programmatic-access-to-your-organization/managing-requests-for-personal-access-tokens-in-your-organization',
+  'https://docs.github.com/en/enterprise-cloud@latest/organizations/managing-saml-single-sign-on-for-your-organization',
+  'https://docs.github.com/enterprise-cloud@latest/organizations/managing-saml-single-sign-on-for-your-organization/troubleshooting-identity-and-access-management-for-your-organization',
+  'https://docs.github.com/en/enterprise-cloud@latest/admin/managing-iam/using-saml-for-enterprise-iam/configuring-saml-single-sign-on-for-your-enterprise',
+  'https://docs.github.com/en/enterprise-cloud@latest/admin/managing-iam/using-saml-for-enterprise-iam/troubleshooting-saml-authentication',
+  'https://docs.github.com/enterprise-cloud@latest/admin/identity-and-access-management/using-saml-for-enterprise-iam/saml-configuration-reference',
 ];
 
 // ─── Fetch with retry ─────────────────────────────────────────────────────────
