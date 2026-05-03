@@ -74,7 +74,7 @@ This starts:
 # Apply schema
 npm run db:migrate -w packages/backend
 
-# Seed test data (12 cases, 8 scenarios + historical sub-cases)
+# Seed test data (11 cases: 8 scenario cases + 3 historical sub-cases for S6)
 npm run db:seed -w packages/backend
 ```
 
@@ -333,7 +333,7 @@ npm run scenarios:capture -w packages/backend
 # Output: scenarios-output.json at repo root
 ```
 
-All 12 DB cases run through the full pipeline. Expected: **12 passed, 0 failed**.
+All 11 DB cases run through the full pipeline. Expected: **11 passed, 0 failed**.
 
 ### Option B — Angular UI
 
