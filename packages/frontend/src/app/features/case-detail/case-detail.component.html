@@ -50,9 +50,8 @@
       <span></span>
     }
     <button
-      mat-flat-button
-      color="primary"
       class="run-btn"
+      [class.run-btn--running]="isRunning()"
       [disabled]="isRunning()"
       (click)="runPipeline()"
     >
