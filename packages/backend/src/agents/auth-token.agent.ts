@@ -101,14 +101,6 @@ export class AuthTokenAgent {
         output: (samlConfig ?? {}) as Record<string, unknown>,
       });
 
-      // 4. Check repeat history (already in context from OrchestratorAgent)
-      const sameCategory = context.caseHistory.filter((e) => {
-        // case_history events don't have issue_category directly, but the parent case might
-        // We check event_type for patterns related to the current issueCategory
-        return e.event_type === 'case_opened' || e.event_type === 'escalated';
-      });
-      const repeatCount = sameCategory.length;
-
       // Append to shared context
       context.toolResults.push(...toolResults);
 
@@ -127,7 +119,7 @@ ${tokenRecord ? JSON.stringify(tokenRecord, null, 2) : 'No token ID found in cas
 ## SAML Config
 ${samlConfig ? JSON.stringify(samlConfig, null, 2) : 'No SAML config found.'}
 
-## Case History (${context.caseHistory.length} events, same-pattern count: ${repeatCount})
+## Case History (${context.caseHistory.length} prior events)
 ${JSON.stringify(context.caseHistory.slice(0, 10), null, 2)}
 
 ## Current Timestamp

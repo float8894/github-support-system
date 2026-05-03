@@ -81,11 +81,11 @@ npm run db:seed -w packages/backend
 ### 5. Ingest RAG Corpus
 
 ```bash
-# Fetch and embed 22 GitHub Docs pages into pgvector
+# Fetch and embed 41 GitHub Docs pages into pgvector
 npm run ingest -w packages/backend
 ```
 
-This may take 2–3 minutes on first run (22 HTTP fetches + OpenAI embedding calls).
+This may take 2–3 minutes on first run (41 HTTP fetches + OpenAI embedding calls).
 
 ### 6. Start All Services
 
@@ -119,9 +119,10 @@ Once all three services are running you interact entirely through the Angular fr
 
 | Route        | Page                | Purpose                                                                |
 | ------------ | ------------------- | ---------------------------------------------------------------------- |
-| `/scenarios` | **Scenario Runner** | One-click execution of all 8 pre-seeded test cases — no UUIDs required |
-| `/submit`    | **Submit Case**     | Manually author a new case using real entity UUIDs                     |
+| `/`          | **Submit Case**     | Manually author a new case using real entity UUIDs                     |
+| `/cases`     | **Case List**       | Browse all support cases (newest first)                                |
 | `/cases/:id` | **Case Detail**     | Live SSE pipeline stream + final outcome for any case                  |
+| `/scenarios` | **Scenario Runner** | One-click execution of all 8 pre-seeded test cases — no UUIDs required |
 
 ---
 
@@ -198,7 +199,7 @@ The `org_id` you choose **must belong to the customer** you selected in Step 1 (
 
 #### Step 3 — Fill in the form
 
-Go to **http://localhost:4200/submit** and complete all five fields:
+Go to **http://localhost:4200** and complete all five fields:
 
 | Field           | Validation                                        | Guidance                                                                                                                                                                                                                                     |
 | --------------- | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -253,22 +254,31 @@ Once `complete` fires, the outcome panel expands below the event log. It contain
 
 ---
 
-### Fetching an outcome via API (no UI)
+### API Reference
 
-If you want the raw JSON outcome for a case that has already been run:
+| Method   | Route                   | Description                                                                |
+| -------- | ----------------------- | -------------------------------------------------------------------------- |
+| `POST`   | `/api/cases`            | Create a support case. Returns `{ case_id }`.                              |
+| `GET`    | `/api/cases`            | List all cases (newest first, limit 50).                                   |
+| `GET`    | `/api/cases/:id`        | Fetch the stored `CaseOutcome` for a completed case.                       |
+| `GET`    | `/api/cases/:id/case`   | Fetch the raw `SupportCase` database row.                                  |
+| `POST`   | `/api/cases/:id/run`    | Run the agent pipeline; returns a live SSE stream of `AgentEvent` objects. |
+| `GET`    | `/api/cases/:id/stream` | Replay stored `AgentEvent` objects from Redis (for already-run cases).     |
+| `DELETE` | `/api/cases/:id`        | Delete a case and its cached outcome from Redis.                           |
+| `POST`   | `/api/ingest`           | Trigger RAG corpus ingestion. Requires `X-Admin-Key` header (admin only).  |
 
-```bash
-curl http://localhost:3000/api/cases/<case_id>
-```
-
-To trigger the pipeline programmatically and stream events:
+SSE event format (each `data:` frame is a JSON-serialised `AgentEvent`):
 
 ```bash
 curl -N -H "Accept: text/event-stream" \
   -X POST http://localhost:3000/api/cases/<case_id>/run
 ```
 
-Each line is a standard SSE `data:` frame containing a JSON-serialised `AgentEvent`.
+Fetch a completed outcome:
+
+```bash
+curl http://localhost:3000/api/cases/<case_id>
+```
 
 ---
 

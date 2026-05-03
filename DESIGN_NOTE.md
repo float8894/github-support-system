@@ -114,7 +114,7 @@ may be stale and cannot cite specific documentation sections. Requiring every
 `CaseOutcome` to have non-empty `evidence.doc_citations` forces the resolution to
 be grounded in authoritative content.
 
-**Corpus selection:** 22 GitHub Docs URLs were chosen to cover all eight scenario
+**Corpus selection:** 41 GitHub Docs URLs were chosen to cover all eight scenario
 types: billing & plans, Actions entitlements, PAT / OAuth / SAML auth, API rate
 limits, and enterprise features. The URLs were fetched via `node-fetch`, converted
 to Markdown with `turndown`, and chunked at ~500 tokens with a 50-token overlap to

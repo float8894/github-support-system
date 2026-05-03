@@ -112,8 +112,30 @@ async function runPipeline(
     if (!agent) continue;
 
     emit(buildEvent('agent_start', `Starting ${agentName}...`, { agentName }));
+    const toolsBefore = context.toolResults.length;
     const finding = await agent.run(context);
     context.agentFindings.push(finding);
+
+    // Emit tool_called for each MCP tool this agent invoked
+    const newTools = context.toolResults.slice(toolsBefore);
+    for (const toolResult of newTools) {
+      emit(
+        buildEvent(
+          'tool_called',
+          `${agentName} called ${toolResult.tool_name}`,
+          {
+            agentName: agentName as AgentType,
+            data: {
+              tool_name: toolResult.tool_name,
+              input: toolResult.input,
+              output: toolResult.output,
+              ...(toolResult.error ? { error: toolResult.error } : {}),
+            },
+          },
+        ),
+      );
+    }
+
     emit(
       buildEvent(
         'agent_done',
@@ -139,7 +161,6 @@ async function runPipeline(
 
   // 6. Persist outcome to Redis (24h TTL)
   const outcomeKey = `outcome:${caseId}`;
-  const eventsKey = `events:${caseId}`;
   await redis.set(outcomeKey, JSON.stringify(outcome), 'EX', 86400);
 
   // 7. Update support_cases status + issue_category in DB
@@ -157,10 +178,7 @@ async function runPipeline(
     [status, outcome.issue_type, caseId],
   );
 
-  // 8. Expire the events list at the same TTL
-  await redis.expire(eventsKey, 86400);
-
-  // 9. Complete event
+  // 8. Complete event
   emit(
     buildEvent('complete', 'Case analysis complete', {
       agentName: 'OrchestratorAgent',
@@ -273,6 +291,8 @@ casesRouter.post('/cases/:id/run', async (req: Request, res: Response) => {
 
   try {
     await runPipeline(supportCase, emit);
+    // Expire events list after pipeline returns so all rpush calls precede expire in Redis's command queue
+    await redis.expire(eventsKey, 86400);
   } catch (err) {
     log.error({ err, case_id: id }, 'Pipeline error');
     const errorEvent = buildEvent(
